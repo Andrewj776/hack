@@ -58,6 +58,20 @@ body.dash #dash,body.triage #triage{display:block}body.dash .app,body.triage .ap
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
 .note{font-size:13px;color:var(--mut);margin-top:14px}
 #card{position:absolute;top:12px;right:12px;width:min(300px,calc(100% - 24px));background:#0e141bf2;color:#fff;border:1px solid #2b3744;border-radius:12px;padding:12px 40px 12px 14px;display:none;font-size:15px}#card .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}#card .tag{background:#2b3744;border-radius:6px;padding:3px 9px;font-size:14px}#card .tag.r{background:#e5202e}#card small{color:#c3ccd5;font-size:13.5px;display:block}#card{max-height:calc(100% - 24px);overflow:auto}#card .ch{border-top:1px solid #2b3744;margin-top:8px;padding-top:8px}#card .cb{position:static;display:block;width:100%;text-align:left;background:#1d2733;border:1px solid #2b3744;border-radius:8px;padding:7px 10px;margin-top:6px;font-size:14px;line-height:1.3;color:#fff;cursor:pointer}#card .cb:disabled{opacity:.4;cursor:not-allowed}#card .cb:hover:not(:disabled){border-color:#e5202e}#card .cb small{display:inline;margin-left:6px;color:#9fb0c0;font-size:13px}#card button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff;font-size:24px;line-height:1;cursor:pointer}
+
+/* Unified dashboard and triage use the same page state as the 3D map. */
+.workspace{max-width:1150px;margin:0 auto;padding:22px 20px 70px;overflow:auto;height:100%}
+#dash,#triage{overflow:auto;height:calc(100vh - 54px)}
+.workspace h1{font-size:clamp(26px,4vw,40px);margin-bottom:10px}
+.workspace label{display:block;font-weight:700;font-size:14px;margin:12px 0 4px}
+.workspace select,.workspace textarea{width:100%;max-width:650px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;padding:9px}
+.workspace textarea{display:block;margin-bottom:12px}
+#dq td,#dq th{white-space:normal}#dq .ab{margin:3px}
+#reportList .report{padding:13px;border:1px solid var(--line);border-left:6px solid var(--red);border-radius:9px;margin-top:10px;background:var(--card)}
+#reportList .report p{margin:6px 0;overflow-wrap:anywhere}
+#reportList .report small{color:var(--mut)}
+#reportList .report button{margin-top:8px}
+@media(max-width:650px){.workspace{padding:14px}.dctl button{flex:1}.dk{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -72,214 +86,24 @@ body.dash #dash,body.triage #triage{display:block}body.dash .app,body.triage .ap
   <h2>Risk level <span id="cnt" class="sub"></span></h2><div class="leg" id="leg"></div>
   <h2>Check these first</h2><div class="top" id="top"></div>
   <h2>Selected household</h2><div class="det" id="det">Click a house on the map.</div>
-  <details class="how"><summary>How the risk score works</summary><table><tr><td>Disaster impact (from imagery and outage data)</td><td>up to 50</td></tr><tr><td>Depends on medical equipment</td><td>+16</td></tr><tr><td>Age 75 or older</td><td>+10</td></tr><tr><td>Limited mobility</td><td>+9</td></tr><tr><td>No car</td><td>+6</td></tr><tr><td>Thin cash cushion</td><td>+6</td></tr><tr><td>Lives alone</td><td>+6</td></tr><tr><td>Limited English</td><td>+5</td></tr><tr><td>Young children</td><td>+5</td></tr><tr><td>Underinsured</td><td>+5</td></tr></table><p class="sub" style="margin-top:8px">Critical 55+, High 40–54, Elevated 25–39, Low under 25. Rules are transparent and every score can be explained and audited.</p></details>
+  <details class="how"><summary>How the risk score works</summary><table><tr><td>Simulated disaster impact</td><td>up to 50</td></tr><tr><td>Depends on medical equipment</td><td>+16</td></tr><tr><td>Age 75 or older</td><td>+10</td></tr><tr><td>Limited mobility</td><td>+9</td></tr><tr><td>No car</td><td>+6</td></tr><tr><td>Thin cash cushion</td><td>+6</td></tr><tr><td>Lives alone</td><td>+6</td></tr><tr><td>Limited English</td><td>+5</td></tr><tr><td>Young children</td><td>+5</td></tr><tr><td>Underinsured</td><td>+5</td></tr></table><p class="sub" style="margin-top:8px">Critical 55+, High 40–54, Elevated 25–39, Low under 25. Rules are transparent and every score can be explained and audited.</p></details>
   <p class="note">Synthetic data. Risk only changes who is helped first. It never changes coverage or claim decisions, and people make the final call.</p>
 </aside>
 <main id="stage"><canvas id="c" tabindex="0" aria-label="3D map of 140 households colored by risk"></canvas><div id="tip"></div><div id="card" role="status"></div><div id="kpi"></div><div id="tools"><button data-v="reset">Reset view</button><button data-v="top">Top-down</button><button data-v="spin" aria-pressed="false">Auto-rotate</button></div><div class="hint">Drag to rotate · scroll to zoom · click a house</div></main>
 </div>
-<section id="dash" aria-label="Responder dashboard"><iframe title="Responder dashboard" style="width:100%;height:100%;border:0;display:block" srcdoc="&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
-&lt;title&gt;Quiet Signal: responder dashboard&lt;/title&gt;
-&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;style&gt;
-:root{--bg:#f1f2f4;--ink:#1a1a1a;--card:#fff;--line:#dcdfe3;--mut:#5c6470;--red:#e5202e;--ok:#0a8f6a;--sh:#0000001a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=&quot;light&quot;]){--bg:#15181c;--ink:#f2f2f2;--card:#22262b;--line:#394048;--mut:#aeb6c0;--red:#ff5a66;--ok:#2fd1a0;--sh:#00000066}}
-:root[data-theme=&quot;dark&quot;]{--bg:#15181c;--ink:#f2f2f2;--card:#22262b;--line:#394048;--mut:#aeb6c0;--red:#ff5a66;--ok:#2fd1a0;--sh:#00000066}
-*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 &quot;Source Sans 3&quot;,&quot;Helvetica Neue&quot;,Arial,sans-serif}
-.hero{background:linear-gradient(135deg,#6e0d16 0%,#e5202e 58%,#ff6a4d 100%);color:#fff;padding:16px 16px 76px}
-.hero .in{max-width:960px;margin:0 auto}
-nav{display:flex;gap:6px;flex-wrap:wrap}nav a{color:#ffffffd0;text-decoration:none;font-weight:600;font-size:15px;padding:5px 14px;border-radius:99px}nav a:hover{background:#ffffff26}nav a[aria-current]{background:#fff;color:#b3141f}
-h1{font-size:clamp(28px,5.2vw,46px);line-height:1.05;margin:18px 0 8px;font-weight:800;letter-spacing:-.03em;max-width:20ch}
-.lede{color:#ffffffe0;max-width:60ch;margin:0}
-.wrap{max-width:960px;margin:-54px auto 0;padding:0 16px 60px;position:relative}
-h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:24px 0 8px}
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}@media(max-width:640px){.tiles{grid-template-columns:repeat(2,1fr)}}
-.tile{background:var(--card);border-radius:14px;padding:12px 16px;border-top:4px solid var(--line);box-shadow:0 8px 24px var(--sh)}
-.tile span{font-size:14px;color:var(--mut);font-weight:600}.tile strong{display:block;font-size:38px;line-height:1.1}.tile small{color:var(--mut);font-size:13.5px}
-.tile.hot{border-top-color:var(--red)}.tile.hot strong{color:var(--red)}.tile.amb{border-top-color:#e8a317}.tile.grn{border-top-color:var(--ok)}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--red);margin-right:6px;animation:pl 1.4s infinite}
-@keyframes pl{0%{box-shadow:0 0 0 0 #e5202e99}100%{box-shadow:0 0 0 10px #e5202e00}}@media(prefers-reduced-motion:reduce){.dot{animation:none}}
-.cov{background:var(--card);border-radius:14px;padding:12px 16px;margin-top:12px;box-shadow:0 2px 8px var(--sh)}
-.covh{display:flex;justify-content:space-between;gap:10px;font-size:15px}.covh span{color:var(--mut)}
-.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}.bar em{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#7be0bd);border-radius:6px;transition:width .4s}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 14px;font:inherit;font-size:15px;cursor:pointer;transition:background .15s,transform .15s}
-.chip:hover{transform:translateY(-1px)}.chip[aria-pressed=true]{background:#e5202e;border-color:#e5202e;color:#fff}
-.chip:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--red);outline-offset:2px}
-.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
-.tm{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:8px 12px;font-size:14.5px;box-shadow:0 1px 4px var(--sh)}
-.tm u{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden;text-decoration:none}.tm em{display:block;height:100%;background:#e5202e;transition:width .4s}.tm span{color:var(--mut);font-size:13.5px;white-space:nowrap}
-ul.cases{list-style:none;margin:0;padding:0;display:grid;gap:12px}
-ul.cases&gt;li{display:grid;grid-template-columns:76px 1fr;gap:14px;background:var(--card);border-radius:14px;padding:14px;box-shadow:0 2px 8px var(--sh);transition:box-shadow .2s,transform .2s}
-ul.cases&gt;li:hover{box-shadow:0 10px 26px var(--sh);transform:translateY(-1px)}
-ul.cases&gt;li.silent{box-shadow:0 0 0 2px #e5202e77,0 6px 18px #e5202e30}
-@media(max-width:520px){ul.cases&gt;li{grid-template-columns:58px 1fr;gap:10px}}
-.sc{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;background:var(--c);color:#fff;text-align:center;padding:6px 0}
-.y .sc{color:#1a1a1a}.sc strong{font-size:30px;line-height:1}.sc small{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-.hd{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}.zn{color:var(--mut);font-size:14px}
-.tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 8px;font-size:13.5px;color:var(--mut);margin:6px 6px 0 0}
-.hd .tag{margin:0}.tag.bad{border-color:var(--red);color:var(--red);font-weight:700}.tag.ok{border-color:var(--ok);color:var(--ok);font-weight:700}
-ol.step{display:flex;gap:4px;list-style:none;margin:12px 0 0;padding:0}
-ol.step li{flex:1;font-size:12.5px;color:var(--mut);border-top:4px solid var(--line);padding-top:3px;border-radius:2px}
-ol.step li.d{border-top-color:var(--ok);color:var(--ok)}ol.step li.n{border-top-color:var(--c);color:var(--ink);font-weight:700}
-.act{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:end;margin-top:12px}
-.act label{font-size:13.5px;color:var(--mut);display:block}
-select{font:inherit;font-size:15px;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);display:block;margin-top:2px}
-select:disabled{opacity:.5}
-ol.log{list-style:none;margin:0;padding:0;font-size:14.5px;color:var(--mut);background:var(--card);border-radius:12px;padding:6px 14px;box-shadow:0 1px 4px var(--sh)}ol.log li{border-top:1px solid var(--line);padding:6px 0}ol.log li:first-child{border-top:0}
-.note{font-size:13.5px;color:var(--mut);margin-top:22px;max-width:70ch}
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;header class=&quot;hero&quot;&gt;&lt;div class=&quot;in&quot;&gt;
-  &lt;h1&gt;Who needs us, who’s on it, and who haven’t we reached?&lt;/h1&gt;
-  &lt;p class=&quot;lede&quot;&gt;Every flagged household in one place. Responders assign teams, update each case and mark when someone has been reached. Households nobody has contacted stay highlighted until a person reaches them.&lt;/p&gt;
-  &lt;/div&gt;&lt;/header&gt;
-&lt;div class=&quot;wrap&quot;&gt;
-  &lt;div class=&quot;tiles&quot; id=&quot;tiles&quot;&gt;&lt;/div&gt;&lt;div class=&quot;cov&quot; id=&quot;cov&quot;&gt;&lt;/div&gt;
-  &lt;h2&gt;Show&lt;/h2&gt;&lt;div class=&quot;chips&quot; id=&quot;chips&quot;&gt;&lt;/div&gt;
-  &lt;h2&gt;Team workload&lt;/h2&gt;&lt;div class=&quot;teams&quot; id=&quot;teams&quot;&gt;&lt;/div&gt;
-  &lt;h2 id=&quot;count&quot;&gt;&lt;/h2&gt;
-  &lt;ul class=&quot;cases&quot; id=&quot;list&quot;&gt;&lt;/ul&gt;
-  &lt;h2&gt;Activity log&lt;/h2&gt;&lt;ol class=&quot;log&quot; id=&quot;log&quot;&gt;&lt;/ol&gt;
-  &lt;p class=&quot;note&quot;&gt;Synthetic data. Risk ranking only changes who is helped first. It never changes coverage or claim decisions, and people make every assignment and status change. Changes reset when you refresh the page.&lt;/p&gt;
-&lt;/div&gt;
-&lt;script&gt;
-const mul=s=&gt;()=&gt;{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s&gt;&gt;&gt;15,1|s);t=t+Math.imul(t^t&gt;&gt;&gt;7,61|t)^t;return((t^t&gt;&gt;&gt;14)&gt;&gt;&gt;0)/4294967296};
-const TEAMS=[&#x27;Alpha&#x27;,&#x27;Bravo&#x27;,&#x27;Charlie&#x27;,&#x27;Delta&#x27;],STS=[&#x27;New&#x27;,&#x27;Assigned&#x27;,&#x27;En route&#x27;,&#x27;Resolved&#x27;],LV=[[&#x27;Elevated&#x27;,&#x27;#f0c030&#x27;],[&#x27;High&#x27;,&#x27;#f08030&#x27;],[&#x27;Critical&#x27;,&#x27;#e5202e&#x27;]];
-const FIL={all:[&#x27;All&#x27;,h=&gt;true],unc:[&#x27;Not contacted&#x27;,h=&gt;!h.contacted],una:[&#x27;No team yet&#x27;,h=&gt;!h.team],act:[&#x27;In progress&#x27;,h=&gt;h.team&amp;&amp;h.st!==&#x27;Resolved&#x27;],res:[&#x27;Resolved&#x27;,h=&gt;h.st===&#x27;Resolved&#x27;]};
-const r=mul(11),D=[];let f=&#x27;all&#x27;,L=[];
-for(let i=0;i&lt;36;i++){
-  const a=r()&lt;.3,m=r()&lt;.2,nc=r()&lt;.25,lc=r()&lt;.4,dm=.3+.7*r();
-  const score=Math.round(dm*55+(a?12:0)+(m?18:0)+(nc?7:0)+(lc?8:0));
-  const contacted=r()&lt;.7-.15*(a+m+nc);
-  const team=contacted&amp;&amp;r()&lt;.4?TEAMS[Math.floor(r()*4)]:null;
-  D.push({id:100+i,zone:&#x27;ABCD&#x27;[Math.floor(r()*4)],a,m,nc,lc,score,lv:score&gt;=55?2:score&gt;=40?1:0,contacted,team,st:team?&#x27;Assigned&#x27;:&#x27;New&#x27;});
-}
-const get=id=&gt;D.find(h=&gt;h.id==id);
-function note(t){L.unshift(new Date().toLocaleTimeString([],{hour:&#x27;2-digit&#x27;,minute:&#x27;2-digit&#x27;})+&#x27; · &#x27;+t);L=L.slice(0,8)}
-function draw(){
-  const unc=D.filter(h=&gt;!h.contacted),crit=unc.filter(h=&gt;h.lv===2).length;
-  const act=D.filter(FIL.act[1]).length,res=D.filter(FIL.res[1]).length,pct=Math.round((D.length-unc.length)/D.length*100);
-  document.getElementById(&#x27;tiles&#x27;).innerHTML=
-    `&lt;div class=&quot;tile&quot;&gt;&lt;span&gt;Flagged households&lt;/span&gt;&lt;strong&gt;${D.length}&lt;/strong&gt;&lt;/div&gt;`+
-    `&lt;div class=&quot;tile hot&quot;&gt;&lt;span&gt;&lt;i class=&quot;dot&quot;&gt;&lt;/i&gt;Not contacted&lt;/span&gt;&lt;strong&gt;${unc.length}&lt;/strong&gt;&lt;small&gt;${crit} critical&lt;/small&gt;&lt;/div&gt;`+
-    `&lt;div class=&quot;tile amb&quot;&gt;&lt;span&gt;In progress&lt;/span&gt;&lt;strong&gt;${act}&lt;/strong&gt;&lt;/div&gt;`+
-    `&lt;div class=&quot;tile grn&quot;&gt;&lt;span&gt;Resolved&lt;/span&gt;&lt;strong&gt;${res}&lt;/strong&gt;&lt;/div&gt;`;
-  document.getElementById(&#x27;cov&#x27;).innerHTML=`&lt;div class=&quot;covh&quot;&gt;&lt;b&gt;${pct}% of flagged households reached&lt;/b&gt;&lt;span&gt;${D.length-unc.length} of ${D.length}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;bar&quot;&gt;&lt;em style=&quot;width:${pct}%&quot;&gt;&lt;/em&gt;&lt;/div&gt;`;
-  document.getElementById(&#x27;chips&#x27;).innerHTML=Object.keys(FIL).map(k=&gt;`&lt;button class=&quot;chip&quot; data-f=&quot;${k}&quot; aria-pressed=&quot;${k===f}&quot;&gt;${FIL[k][0]}&lt;/button&gt;`).join(&#x27;&#x27;);
-  const cnt=t=&gt;D.filter(h=&gt;h.team===t&amp;&amp;h.st!==&#x27;Resolved&#x27;).length,mx=Math.max(1,...TEAMS.map(cnt));
-  document.getElementById(&#x27;teams&#x27;).innerHTML=TEAMS.map(t=&gt;`&lt;div class=&quot;tm&quot;&gt;&lt;b&gt;Team ${t}&lt;/b&gt;&lt;u&gt;&lt;em style=&quot;width:${cnt(t)/mx*100}%&quot;&gt;&lt;/em&gt;&lt;/u&gt;&lt;span&gt;${cnt(t)} active&lt;/span&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
-  const rows=D.filter(FIL[f][1]).sort((p,q)=&gt;q.score-p.score);
-  document.getElementById(&#x27;count&#x27;).textContent=`${rows.length} household${rows.length===1?&#x27;&#x27;:&#x27;s&#x27;}, most urgent first`;
-  document.getElementById(&#x27;list&#x27;).innerHTML=rows.map(h=&gt;{
-    const fx=[h.a&amp;&amp;&#x27;Age 75+&#x27;,h.m&amp;&amp;&#x27;Medical equipment&#x27;,h.nc&amp;&amp;&#x27;No car&#x27;,h.lc&amp;&amp;&#x27;Thin cash cushion&#x27;].filter(Boolean).map(x=&gt;`&lt;span class=&quot;tag&quot;&gt;${x}&lt;/span&gt;`).join(&#x27;&#x27;);
-    const k=h.lv,c=LV[k][1],si=STS.indexOf(h.st);
-    return `&lt;li class=&quot;${!h.contacted&amp;&amp;k===2?&#x27;silent&#x27;:&#x27;&#x27;} ${k===0?&#x27;y&#x27;:&#x27;&#x27;}&quot; style=&quot;--c:${c}&quot;&gt;&lt;div class=&quot;sc&quot;&gt;&lt;strong&gt;${h.score}&lt;/strong&gt;&lt;small&gt;${LV[k][0]}&lt;/small&gt;&lt;/div&gt;
-    &lt;div&gt;&lt;div class=&quot;hd&quot;&gt;&lt;b&gt;Household ${h.id}&lt;/b&gt;&lt;span class=&quot;zn&quot;&gt;Zone ${h.zone}&lt;/span&gt;${h.contacted?&#x27;&lt;span class=&quot;tag ok&quot;&gt;Contacted&lt;/span&gt;&#x27;:&#x27;&lt;span class=&quot;tag bad&quot;&gt;Not contacted&lt;/span&gt;&#x27;}&lt;/div&gt;&lt;div&gt;${fx}&lt;/div&gt;
-    &lt;ol class=&quot;step&quot;&gt;${STS.map((x,j)=&gt;`&lt;li class=&quot;${j&lt;si?&#x27;d&#x27;:j===si?&#x27;n&#x27;:&#x27;&#x27;}&quot;&gt;${x}&lt;/li&gt;`).join(&#x27;&#x27;)}&lt;/ol&gt;
-    &lt;div class=&quot;act&quot;&gt;&lt;label&gt;Team&lt;select data-t=&quot;${h.id}&quot;&gt;&lt;option value=&quot;&quot;&gt;Unassigned&lt;/option&gt;${TEAMS.map(t=&gt;`&lt;option ${h.team===t?&#x27;selected&#x27;:&#x27;&#x27;}&gt;${t}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;/label&gt;
-    &lt;label&gt;Status&lt;select data-s=&quot;${h.id}&quot; ${h.team?&#x27;&#x27;:&#x27;disabled&#x27;}&gt;${STS.map(x=&gt;`&lt;option ${h.st===x?&#x27;selected&#x27;:&#x27;&#x27;}&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;/label&gt;
-    &lt;button class=&quot;chip&quot; data-c=&quot;${h.id}&quot;&gt;${h.contacted?&#x27;Mark not contacted&#x27;:&#x27;Mark contacted&#x27;}&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/li&gt;`}).join(&#x27;&#x27;)||&#x27;&lt;li&gt;No households match this view.&lt;/li&gt;&#x27;;
-  document.getElementById(&#x27;log&#x27;).innerHTML=L.length?L.map(x=&gt;`&lt;li&gt;${x}&lt;/li&gt;`).join(&#x27;&#x27;):&#x27;&lt;li&gt;No actions yet. Assign a team or update a case to start the log.&lt;/li&gt;&#x27;;
-}
-document.addEventListener(&#x27;change&#x27;,e=&gt;{
-  const d=e.target.dataset;if(!d.t&amp;&amp;!d.s)return;
-  if(d.t){const h=get(d.t);h.team=e.target.value||null;h.st=h.team?(h.st===&#x27;New&#x27;?&#x27;Assigned&#x27;:h.st):&#x27;New&#x27;;note(h.team?`Household ${h.id} assigned to Team ${h.team}`:`Household ${h.id} unassigned`)}
-  if(d.s){const h=get(d.s);h.st=e.target.value;if(h.st===&#x27;Resolved&#x27;)h.contacted=true;note(`Household ${h.id} marked ${h.st}`)}
-  draw()});
-document.addEventListener(&#x27;click&#x27;,e=&gt;{
-  const b=e.target.closest(&#x27;[data-f],[data-c]&#x27;);if(!b)return;
-  if(b.dataset.f)f=b.dataset.f;
-  else{const h=get(b.dataset.c);h.contacted=!h.contacted;note(`Household ${h.id} marked ${h.contacted?&#x27;contacted&#x27;:&#x27;not contacted&#x27;}`)}
-  draw()});
-draw();
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-"></iframe></section><section id="triage" aria-label="AI triage"><iframe title="AI triage" style="width:100%;height:100%;border:0;display:block" srcdoc="&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
-&lt;title&gt;Quiet Signal: AI triage of incoming messages&lt;/title&gt;
-&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;style&gt;
-:root{--bg:#f4f4f4;--ink:#1a1a1a;--card:#fff;--line:#d9d9d9;--mut:#5c5c5c;--red:#e5202e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=&quot;light&quot;]){--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}}
-:root[data-theme=&quot;dark&quot;]{--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}
-*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 &quot;Source Sans 3&quot;,&quot;Helvetica Neue&quot;,Arial,sans-serif}
-.band{height:10px;background:#e5202e}
-.wrap{max-width:820px;margin:0 auto;padding:22px 16px 60px}
-h1{font-size:clamp(28px,5.5vw,48px);line-height:1.05;margin:8px 0 10px;font-weight:800;letter-spacing:-.03em;max-width:18ch}
-.lede{color:var(--mut);max-width:62ch;margin:0 0 18px}
-.badge{font-size:13px;border:1px solid var(--line);border-radius:99px;padding:2px 10px;color:var(--mut);background:var(--card)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
-.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 14px;font:inherit;font-size:15px;cursor:pointer}
-.chip[aria-pressed=true]{background:#e5202e;border-color:#e5202e;color:#fff}
-.chip:focus-visible,a:focus-visible{outline:3px solid var(--red);outline-offset:2px}
-#sum{color:var(--mut);font-size:15px;margin:0 0 12px}
-ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-li{background:var(--card);border:1px solid var(--line);border-left-width:8px;border-radius:12px;padding:14px 16px}
-.msg{font-size:18px;font-weight:600;margin:0 0 8px}
-.pill{display:inline-block;border-radius:6px;padding:1px 9px;font-weight:700;font-size:14px;color:#fff;margin-right:6px}
-.tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 9px;font-size:14px;color:var(--mut)}
-.why{margin:8px 0 0;font-size:15px}.why span{color:var(--mut)}
-.note{font-size:13.5px;color:var(--mut);margin-top:22px;max-width:70ch}
-a{color:var(--red);font-weight:600}
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div class=&quot;band&quot;&gt;&lt;/div&gt;
-&lt;div class=&quot;wrap&quot;&gt;
-  &lt;span class=&quot;badge&quot;&gt;16 synthetic messages · results pre-run through an LLM&lt;/span&gt;
-  &lt;h1&gt;Read every message. Rank by need, not by who wrote first.&lt;/h1&gt;
-  &lt;p class=&quot;lede&quot;&gt;After a disaster, thousands of texts, calls and claims arrive at once. An AI model reads each one, pulls out the need type and urgency, and explains its ranking in plain words. A person reviews the list and makes every decision.&lt;/p&gt;
-  &lt;div class=&quot;chips&quot; id=&quot;chips&quot;&gt;&lt;/div&gt;
-  &lt;p id=&quot;sum&quot;&gt;&lt;/p&gt;
-  &lt;ul id=&quot;list&quot;&gt;&lt;/ul&gt;
-  &lt;p class=&quot;note&quot;&gt;All messages are made up. Rankings were produced ahead of time by an LLM and checked by a person, so nothing here calls an AI live. The AI only suggests an order. It never changes coverage or claim decisions. Real use would need customer consent and local responder coordination.&lt;/p&gt;
-  
-&lt;/div&gt;
-&lt;script&gt;
-const LV={5:[&#x27;Critical&#x27;,&#x27;#e5202e&#x27;],4:[&#x27;Urgent&#x27;,&#x27;#f08030&#x27;],3:[&#x27;Soon&#x27;,&#x27;#f0c030&#x27;],2:[&#x27;Routine&#x27;,&#x27;#2fb67c&#x27;],1:[&#x27;Low&#x27;,&#x27;#6b7c8c&#x27;]};
-const M=[
-{m:&quot;My dad is on oxygen and our power has been out since last night. The tank is almost empty.&quot;,u:5,t:&quot;Medical equipment&quot;,r:&quot;Oxygen supply is running out and there is no power to refill it. Hours matter.&quot;},
-{m:&quot;Water is up to our porch and my grandmother can’t walk. We’re on the second floor.&quot;,u:5,t:&quot;Evacuation&quot;,r:&quot;Rising water plus a person who cannot move on their own.&quot;},
-{m:&quot;I need my insulin out of the fridge, but there’s been no power for two days and it’s getting warm.&quot;,u:5,t:&quot;Medical supplies&quot;,r:&quot;Insulin spoils without cold storage, and a missed dose is dangerous.&quot;},
-{m:&quot;There’s a strong gas smell on our street and now inside our house.&quot;,u:5,t:&quot;Safety hazard&quot;,r:&quot;Possible gas leak. Risk of fire or poisoning, and it affects neighbors too.&quot;},
-{m:&quot;No cell service at my mom’s and I haven’t heard from her since the fire. She uses a wheelchair.&quot;,u:5,t:&quot;Welfare check&quot;,r:&quot;Silent, mobility-limited and in the fire zone. Silence here is a warning sign.&quot;},
-{m:&quot;The house is gone. We have nowhere to sleep tonight and three kids.&quot;,u:4,t:&quot;Shelter&quot;,r:&quot;Safe now but with no shelter tonight. Children are involved.&quot;},
-{m:&quot;I live alone, I’m 82, I have had no heat since the storm and I can’t drive.&quot;,u:4,t:&quot;Welfare check&quot;,r:&quot;Older, isolated and cold with no transport. Likely to get worse each day.&quot;},
-{m:&quot;I’m out of my heart medication and the pharmacy is closed because of the flooding.&quot;,u:4,t:&quot;Medical supplies&quot;,r:&quot;A missed heart medication is risky within a day or two.&quot;},
-{m:&quot;Hello, I don’t speak much English. No one has come to our building and we have no power.&quot;,u:3,t:&quot;Outreach gap&quot;,r:&quot;Possibly overlooked because of language. Needs a translator and a visit, not just a text.&quot;},
-{m:&quot;Trees fell across the road. We can’t get out, but nobody is hurt.&quot;,u:3,t:&quot;Road access&quot;,r:&quot;No injuries, but they are stuck. Becomes urgent if supplies run short.&quot;},
-{m:&quot;The roof is torn off and rain is pouring in, but we’re all okay at my sister’s house.&quot;,u:2,t:&quot;Property damage&quot;,r:&quot;Safe place to stay. The damage is real but can wait for an adjuster visit.&quot;},
-{m:&quot;We have no water, but we’re okay. Our neighbors are sharing.&quot;,u:2,t:&quot;Supplies&quot;,r:&quot;Basic need is being met for now. Flag for a water drop later.&quot;},
-{m:&quot;The basement flooded and we lost a lot of stuff. I’m really upset.&quot;,u:2,t:&quot;Property damage&quot;,r:&quot;Emotional distress, but no safety risk. Offer a friendly callback.&quot;},
-{m:&quot;My rental car is needed because mine was flooded. Just by next week is fine.&quot;,u:2,t:&quot;Claim question&quot;,r:&quot;Not time-critical. Can follow the normal claim process.&quot;},
-{m:&quot;The fence blew down. Can I file a claim online?&quot;,u:1,t:&quot;Claim question&quot;,r:&quot;Minor damage and a simple question. A self-service link is enough.&quot;},
-{m:&quot;Hail dented my car and cracked the windshield.&quot;,u:1,t:&quot;Vehicle claim&quot;,r:&quot;Vehicle damage only, with no risk to anyone’s safety.&quot;}
-];
-let f=0;
-function draw(){
-  const rows=M.filter(x=&gt;!f||x.u===f).sort((a,b)=&gt;b.u-a.u);
-  document.getElementById(&#x27;chips&#x27;).innerHTML=[0,5,4,3,2,1].map(n=&gt;`&lt;button class=&quot;chip&quot; data-f=&quot;${n}&quot; aria-pressed=&quot;${n===f}&quot;&gt;${n?n+&#x27; &#x27;+LV[n][0]:&#x27;All&#x27;}&lt;/button&gt;`).join(&#x27;&#x27;);
-  document.getElementById(&#x27;sum&#x27;).textContent=`Showing ${rows.length} of ${M.length} messages, most urgent first.`;
-  document.getElementById(&#x27;list&#x27;).innerHTML=rows.map(x=&gt;`&lt;li style=&quot;border-left-color:${LV[x.u][1]}&quot;&gt;&lt;p class=&quot;msg&quot;&gt;“${x.m}”&lt;/p&gt;&lt;span class=&quot;pill&quot; style=&quot;background:${LV[x.u][1]};${x.u===3?&#x27;color:#1a1a1a&#x27;:&#x27;&#x27;}&quot;&gt;${x.u} · ${LV[x.u][0]}&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;${x.t}&lt;/span&gt;&lt;p class=&quot;why&quot;&gt;&lt;span&gt;Why the AI ranked it here:&lt;/span&gt; ${x.r}&lt;/p&gt;&lt;/li&gt;`).join(&#x27;&#x27;);
-}
-document.addEventListener(&#x27;click&#x27;,e=&gt;{const b=e.target.closest(&#x27;[data-f]&#x27;);if(b){f=+b.dataset.f;draw()}});
-draw();
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-"></iframe></section>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<section id="dash" aria-label="Responder dashboard"><div class="workspace">
+ <h1>Responder command center</h1><p class="sub">One shared set of 140 synthetic households. Triage reports appear here and on the map.</p>
+ <div id="dk" class="dk"></div><p id="dclock" class="sub"></p>
+ <div class="dctl"><button class="dbtn" data-d="auto">Auto-assign available resources</button><button class="dbtn alt" data-d="adv">Advance 6 hours</button><button class="dbtn alt" data-d="reset">Reset responder simulation</button></div>
+ <div class="dcols"><div class="dcard"><h2>Priority queue</h2><div class="tw"><table id="dq"></table></div></div><div><div class="dcard"><h2>Resource workload</h2><div id="dr"></div></div><div class="dcard"><h2>Response progress</h2><div id="ds"></div></div><div class="dcard"><h2>Activity log</h2><ol id="dl"></ol></div></div></div>
+ </div></section>
+ <section id="triage" aria-label="Emergency report triage"><div class="workspace">
+ <h1>Emergency report triage</h1><p class="sub">Submit a fictional emergency report. The transparent keyword-based classifier suggests a priority; a human must review it.</p>
+ <form id="reportForm" class="dcard"><h2>New simulated report</h2><label for="reportHome">Household</label><select id="reportHome" required></select><label for="reportText">What is happening?</label><textarea id="reportText" rows="4" minlength="10" maxlength="1000" required placeholder="Example: We are trapped upstairs and the water is rising."></textarea><button class="dbtn" type="submit">Analyze and add to response queue</button></form>
+ <div class="dcard"><h2>Incoming reports</h2><div id="reportCount" class="sub"></div><div id="reportList"></div></div>
+ <p class="note">Hackathon demonstration only. No live AI or emergency service is connected. All households are synthetic. Do not enter real personal or emergency information.</p>
+ </div></section>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const W=14,D=10,SP=3,RW=5,gx=c=>c*SP+Math.floor(c/4)*RW,gz=r=>r*SP+Math.floor(r/2)*RW,TW=gx(W-1),TH=gz(D-1),LV=[0x2fb67c,0xf0c030,0xf08030,0xe5202e],LC=['#2fb67c','#f0c030','#f08030','#e5202e'],LN=['Low','Elevated','High','Critical'],LH=[1,1,1.15,1.35];
 const SCN={flood:{n:'Flood',s:7,f:(x,y)=>Math.max(0,1-Math.abs(y-4.5-1.6*Math.sin(x/2.3))/2.6),t:0x2f7fd0,imp:'Flood damage'},
@@ -291,7 +115,7 @@ hurricane:{n:'Hurricane',s:105,f:(x,y)=>Math.min(1,.15+.7*Math.pow(y/(D-1),1.4)+
 winter:{n:'Winter storm',s:126,f:(x,y)=>.4+.5*Math.sin(x/2.6+1)*Math.cos(y/2.2),t:0xbfd6ea,imp:'Power and heat loss'},
 heat:{n:'Heat wave',s:147,f:(x,y)=>.1+.75*Math.exp(-((x-3)**2+(y-6.5)**2)/22),t:0xd9a441,imp:'Heat exposure and power loss'}};
 const FILT=[['alone','Lives alone',h=>h.ls],['mob','Limited mobility',h=>h.mob],['lep','Limited English',h=>h.lep],['kid','Young children',h=>h.kid],['uins','Underinsured',h=>h.ui],['nocar','No car',h=>h.nc],['age','Age 75+',h=>h.a],['med','Medical equipment',h=>h.m],['cash','Thin cash cushion',h=>h.lc],['dmg','Severe impact',h=>h.dm>=.5]];
-const ACT=['Self-service claim. No outreach needed.','Text a claim link and check back tomorrow.','Call within 4 hours and offer a claim visit.','Welfare check and drone pass now. Queue an emergency living advance for approval.'];
+const ACT=['Lower-priority follow-up; confirm needs with a human.','Schedule a check-in and confirm basic needs.','Arrange prompt contact and a welfare assessment.','Prioritize a welfare check and possible rescue coordination.'];
 const S={sc:'flood',on:new Set(),sel:null};
 const mul=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
 let H=[],meshes=[],world=null,renderer,beacons=[];
@@ -332,7 +156,7 @@ function build(){
     if(lv===3){const bm=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:.3,depthWrite:false}),beam=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,3.2,8),bm);beam.position.set(px,3.4,pz);world.add(beam);
       const rings=[0,.5].map(o=>{const m=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}),rg=new THREE.Mesh(new THREE.RingGeometry(.85,1,32),m);rg.rotation.x=-Math.PI/2;rg.position.set(px,2.9,pz);world.add(rg);return{rg,m,o}});beacons.push({i,beam,rings})}
     b.userData.i=ro.userData.i=i;meshes.push(b,ro);
-    H.push({i,x,y,px,pz,dm,age,a,m,nc,lc,ls,mob,lep,kid,ui,score,lv,g,mat});
+    H.push({i,x,y,px,pz,dm,age,a,m,nc,lc,ls,mob,lep,kid,ui,score,baseScore:score,reportBonus:0,lv,g,mat});
   }
   S.sel=null;ring.visible=false;recolor();
 }
@@ -388,7 +212,7 @@ function advance(n){DS.hour+=n;H.map(h=>h.i).filter(i=>DS.st[i].s==='active'&&DS
 function autoAssign(){H.filter(h=>h.lv>=2&&['waiting','assessed'].includes(DS.st[h.i].s)).sort((a,b)=>b.score-a.score).forEach(h=>{const pref=DS.st[h.i].s==='assessed'?['adj']:h.silent?['drone','adj']:h.lv===3?['adj','call']:['call','adj'];for(const t of pref){if(assign(h.i,t))break}})}
 function renderDash(){if(!document.getElementById('dk'))return;
   if(!DS)dashReset();
-  const urg=H.filter(h=>h.lv>=2),cnt={waiting:0,active:0,assessed:0,helped:0};urg.forEach(h=>cnt[DS.st[h.i].s]++);
+  const urg=H.filter(h=>h.lv>=2||reports.some(r=>r.household===h.i)),cnt={waiting:0,active:0,assessed:0,helped:0};urg.forEach(h=>cnt[DS.st[h.i].s]++);
   const silentOpen=urg.filter(h=>h.silent&&DS.st[h.i].s==='waiting').length;
   const tile=(l,v,c)=>`<div class="dt" style="border-left-color:${c}"><small>${l}</small><b>${v}</b></div>`;
   document.getElementById('dk').innerHTML=tile('Critical households',H.filter(h=>h.lv===3).length,'#e5202e')+tile('High risk',H.filter(h=>h.lv===2).length,'#f08030')+tile('Silent, not yet reached',silentOpen,'#3a86d6')+tile('In progress',cnt.active,'#f0b030')+tile('Helped',cnt.helped,'#2fb67c')+tile('Clock','Hour '+DS.hour,'#8a95a1');
@@ -396,14 +220,14 @@ function renderDash(){if(!document.getElementById('dk'))return;
   document.getElementById('dr').innerHTML=Object.keys(RT).map(k=>{const r=RT[k],b=DS.busy[k];return `<div class="rr"><span>${r.pl}</span><span>${b} of ${r.max} busy</span><div class="rb"><i style="width:${b/r.max*100}%"></i></div></div>`}).join('');
   const tot=urg.length||1;
   document.getElementById('ds').innerHTML='<div class="sb">'+Object.keys(SC2).map(k=>`<i style="width:${cnt[k]/tot*100}%;background:${SC2[k][1]}"></i>`).join('')+'</div><div class="sl2">'+Object.keys(SC2).map(k=>`<span><b style="background:${SC2[k][1]}"></b>${SC2[k][0]} ${cnt[k]}</span>`).join('')+'</div>';
-  const tags=h=>[h.a&&'Age 75+',h.m&&'Medical equipment',h.nc&&'No car',h.lc&&'Thin cash',h.dm>=.5&&'Major damage'].filter(Boolean).join(', ');
+  const tags=h=>[h.reportBonus>0&&'Emergency report',h.a&&'Age 75+',h.m&&'Medical equipment',h.nc&&'No car',h.lc&&'Thin cash',h.dm>=.5&&'Major damage'].filter(Boolean).join(', ');
   const q=urg.filter(h=>DS.st[h.i].s!=='helped').sort((a,b)=>((DS.st[a.i].s==='active')-(DS.st[b.i].s==='active'))||b.score-a.score).slice(0,12);
   document.getElementById('dq').innerHTML='<tr><th>Household</th><th>Risk</th><th>Why</th><th>Status</th><th>Action</th></tr>'+(q.map(h=>{const st=DS.st[h.i],sc=SC2[st.s],can=st.s==='waiting'||st.s==='assessed';
     const btn=(t,l)=>`<button class="ab" data-a="${t}:${h.i}" ${DS.busy[t]>=RT[t].max?'disabled':''}>${l}</button>`;
     return `<tr><td><b>${100+h.i}</b>${h.silent?'<small>No contact</small>':''}</td><td><span class="pill" style="background:${LC[h.lv]}">${LN[h.lv]} ${h.score}</span></td><td>${tags(h)}</td><td><span class="dot" style="background:${sc[1]}"></span>${st.s==='active'?RT[st.t].n+', due hour '+st.due:sc[0]}</td><td>${can?btn('adj','Adjuster')+btn('drone','Drone')+btn('call','Call'):''}<button class="ab" data-m="${h.i}">Map</button></td></tr>`}).join('')||'<tr><td colspan="5">Every urgent household has been helped.</td></tr>');
   document.getElementById('dl').innerHTML=DS.log.map(t=>`<li>${t}</li>`).join('')||'<li>No activity yet. Assign a resource or press Auto-assign.</li>';
 }
-function setTab(t){document.body.classList.toggle('dash',t==='dash');document.body.classList.toggle('triage',t==='triage');document.getElementById('tab-triage').setAttribute('aria-selected',t==='triage');document.getElementById('tab-map').setAttribute('aria-selected',t==='map');document.getElementById('tab-dash').setAttribute('aria-selected',t==='dash');}
+function setTab(t){document.body.classList.toggle('dash',t==='dash');document.body.classList.toggle('triage',t==='triage');document.getElementById('tab-triage').setAttribute('aria-selected',t==='triage');document.getElementById('tab-map').setAttribute('aria-selected',t==='map');document.getElementById('tab-dash').setAttribute('aria-selected',t==='dash');if(t==='dash')renderDash();if(t==='triage')renderTriage();if(t==='map'&&renderer)rs();}
 document.addEventListener('click',e=>{
   const T=e.target.closest('[data-tab]');if(T){setTab(T.dataset.tab);return}
   const D2=e.target.closest('[data-d]');if(D2){if(!DS)dashReset();const d=D2.dataset.d;if(d==='adv')advance(6);if(d==='auto')autoAssign();if(d==='reset')dashReset();renderDash();return}
@@ -417,12 +241,12 @@ function choices(h){
   if(h.silent&&st.s==='waiting')t+='<small>No contact from this household yet. A drone pass can check on them.</small>';
   if(st.s==='assessed')t+='<small>Assessed already. A visit is still needed.</small>';
   if(open){t+=['adj','drone','call'].map(k=>`<button class="cb" data-ca="${k}:${i}" ${DS.busy[k]>=RT[k].max?'disabled':''}>${RT[k].n}<small>${RT[k].d} h${DS.busy[k]>=RT[k].max?' · all busy':''}</small></button>`).join('');
-    if(!h.silent)t+=`<button class="cb" data-ca="adv:${i}" ${h.adv?'disabled':''}>${h.adv?'Living advance approved ✓':'Approve $1,500 living advance'}</button>`}
+    if(!h.silent)t+=`<button class="cb" data-ca="adv:${i}" ${h.adv?'disabled':''}>${h.adv?'Advance simulated ✓':'Simulate $1,500 advance approval'}</button>`}
   else t+=`<small>${st.s==='active'?RT[st.t].n+' in progress, due hour '+st.due+'.':'Helped. No further action needed.'}</small>`;
   return t+`<button class="cb" data-ca="adv6:${i}">Advance 6 hours<small>now hour ${DS.hour}</small></button></div>`}
 document.addEventListener('click',e=>{const C=e.target.closest('[data-ca]');if(!C)return;const[a,x]=C.dataset.ca.split(':'),i=+x;
-  if(a==='adv'){H[i].adv=true;dlog('Living advance approved for Household '+(100+i))}else if(a==='adv6')advance(6);else assign(i,a);
-  card(H[i])});
+  if(a==='adv'){H[i].adv=true;dlog('Advance simulation recorded for Household '+(100+i))}else if(a==='adv6')advance(6);else assign(i,a);
+  card(H[i]);renderDash()});
 function animBeacons(){const t=Date.now()/1000,still=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
   beacons.forEach(b=>{const on=!!(H[b.i]&&H[b.i].ok);b.beam.visible=on;b.rings.forEach(r=>{r.rg.visible=on;const ph=still?.3:((t/1.8+r.o)%1);r.rg.scale.setScalar(.7+ph*1.8);r.m.opacity=still?.35:.55*(1-ph)})})}
 let cv2=null,dnSoft=null,mvSoft=0,SF=[];const GT={x:0,z:0,cx:0,cz:0};
@@ -475,9 +299,65 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b
   if(v==='spin'){spin=!spin;b.setAttribute('aria-pressed',spin);return}
   if(v==='reset'){th=.6;ph=1.0;rad=78;goal.set(0,0,0);GT.x=0;GT.z=0;S.sel=null;ring.visible=false;recolor()}
   if(v==='top'){ph=.25;rad=95;goal.set(0,0,0);GT.x=0;GT.z=0}});
-document.addEventListener('change',e=>{if(e.target.name==='sc'){S.sc=e.target.value;build();dashReset()}});
-build();
+document.addEventListener('change',e=>{if(e.target.name==='sc'){S.sc=e.target.value;build();reports=[];dashReset();renderTriage()}});
+
+// ---------------- SHARED EMERGENCY REPORTS ----------------
+// Reports and the responder dashboard both reference H, the 3D map's households.
+// No iframe: there is exactly one source of truth for household scores and status.
+let reports=[];
+const RULES=[
+ {words:/\b(trapped|stuck|can't escape|cannot escape|rising water|flooding inside)\b/i,points:35,type:'Possible rescue need'},
+ {words:/\b(oxygen|unconscious|not breathing|bleeding|chest pain)\b/i,points:40,type:'Possible medical emergency'},
+ {words:/\b(gas leak|smell gas|smell of gas|fire inside|smoke inside)\b/i,points:40,type:'Immediate safety hazard'},
+ {words:/\b(wheelchair|cannot walk|can't walk|limited mobility)\b/i,points:16,type:'Evacuation assistance'},
+ {words:/\b(no power|power outage|out of power|battery dead)\b/i,points:12,type:'Power interruption'},
+ {words:/\b(no water|no food|no shelter|nowhere to sleep)\b/i,points:15,type:'Essential supplies or shelter'}
+];
+function analyzeReport(message){
+  const signals=RULES.filter(rule=>rule.words.test(message));
+  const bonus=Math.min(45,signals.reduce((sum,rule)=>sum+rule.points,0));
+  return {bonus,signals:signals.map(rule=>rule.type)};
+}
+function escapeHTML(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderTriage(){
+  const home=document.getElementById('reportHome');
+  if(!home)return;
+  const old=home.value;
+  home.innerHTML=H.map(h=>`<option value="${h.i}">Household ${100+h.i} · ${LN[h.lv]}</option>`).join('');
+  if(old&&H[Number(old)])home.value=old;
+  document.getElementById('reportCount').textContent=`${reports.length} reports in this ${SCN[S.sc].n.toLowerCase()} scenario`;
+  document.getElementById('reportList').innerHTML=reports.slice().reverse().map(r=>{
+    const h=H[r.household],st=DS.st[h.i];
+    return `<article class="report"><b>Household ${100+h.i}</b> · Risk score ${h.score} · ${LN[h.lv]}
+      <p>${escapeHTML(r.message)}</p><small>Flagged: ${r.signals.map(escapeHTML).join(', ')||'No matching keywords — human review still required'} · ${escapeHTML(st.s)}</small>
+      <div><button class="ab" data-jump="${h.i}">Show on 3D map</button><button class="ab" data-jumpdash="${h.i}">Open responder queue</button></div></article>`;
+  }).join('')||'<p class="sub">No reports yet. Submit a fictional message above to begin.</p>';
+}
+document.getElementById('reportForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const household=Number(document.getElementById('reportHome').value);
+  const message=document.getElementById('reportText').value.trim();
+  if(!H[household]||message.length<10)return;
+  const result=analyzeReport(message),h=H[household];
+  reports.push({household,message,signals:result.signals,bonus:result.bonus});
+  // Recalculate from original risk; never repeatedly inflate score for repeat reports.
+  h.reportBonus=Math.max(h.reportBonus||0,result.bonus);
+  h.score=Math.min(100,h.baseScore+h.reportBonus);
+  h.lv=h.score>=55?3:h.score>=40?2:h.score>=25?1:0;
+  h.silent=false; // A submitted report confirms a message was received, not physical contact.
+  dlog(`Report received from Household ${100+h.i}; review requested`);
+  recolor();renderDash();renderTriage();
+  document.getElementById('reportText').value='';
+});
+document.addEventListener('click',e=>{
+  const m=e.target.closest('[data-jump]');
+  if(m){setTab('map');select(Number(m.dataset.jump));return}
+  const d=e.target.closest('[data-jumpdash]');
+  if(d){setTab('dash');return}
+});
+
+build();dashReset();renderTriage();
 if(!renderer)init2d();(function loop(){requestAnimationFrame(loop);if(!renderer){soft();return}if(spin&&!down)th+=.0025;cam();animBeacons();ring.scale.setScalar(1+.12*Math.sin(Date.now()/250));renderer.render(scene,camera)})();
 </script>
 </body>
-</html>
+</html>. With this being our code, what would be a good start to developing our backend of the thing

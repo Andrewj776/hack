@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiet Signal: 3D disaster risk map</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f4f4;--ink:#1a1a1a;--card:#fff;--line:#d9d9d9;--mut:#5c5c5c;--red:#e5202e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}}
+:root[data-theme="dark"]{--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}
+*{box-sizing:border-box}html,body{height:100%;margin:0}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 "Source Sans 3","Helvetica Neue",Arial,sans-serif}
+.band{height:10px;background:#e5202e}.brand{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:800;font-size:20px}.brand svg{width:38px;height:32px}.app{display:grid;grid-template-columns:370px 1fr;height:calc(100% - 10px)}
+aside{overflow:auto;padding:16px;border-right:6px solid #e5202e}
+#stage{position:relative;min-height:55vh;background:#0e141b}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+@media(max-width:800px){.app{grid-template-columns:1fr;height:auto}#stage{order:-1;height:60vh}aside{border-right:0;border-top:6px solid #e5202e}}
+h1{font-size:26px;line-height:1.1;margin:0 0 4px;font-weight:800}h2{font-size:15px;margin:16px 0 6px;font-weight:700}
+.sub{color:var(--mut);font-size:14.5px;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+.row label,.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 12px;font:inherit;font-size:14.5px;cursor:pointer;position:relative}
+.row input{position:absolute;opacity:0}
+.row label:has(input:checked),.chip[aria-pressed=true]{background:#e5202e;border-color:#e5202e;color:#fff}
+.row label:has(input:focus-visible),.chip:focus-visible,.top button:focus-visible,canvas:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.leg div{display:flex;align-items:center;gap:8px;padding:3px 0}.leg i{width:16px;height:16px;border-radius:4px;display:block}.leg b{margin-left:auto;font-size:18px}
+.top button{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 10px;margin-bottom:6px;font:inherit;font-size:14.5px;cursor:pointer}
+.top small{display:block;color:var(--mut)}
+.det{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:15px}
+.det ul{margin:6px 0;padding-left:18px}.pill{display:inline-block;color:#fff;border-radius:6px;padding:1px 9px;font-weight:700;font-size:14px}
+#tip{position:absolute;pointer-events:none;background:#000c;color:#fff;font-size:13px;padding:4px 8px;border-radius:6px;display:none;white-space:nowrap}
+.hint{position:absolute;left:12px;bottom:10px;color:#9fb0c0;font-size:13px;pointer-events:none}
+#kpi{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 340px)}#kpi div{background:#0e141bf2;border:1px solid #2b3744;border-left:4px solid #2b3744;border-radius:8px;padding:6px 12px;color:#c3ccd5;font-size:12.5px;line-height:1.2}#kpi b{display:block;font-size:24px;color:#fff}
+#tools{position:absolute;right:12px;bottom:12px;display:flex;gap:6px}#tools button{background:#0e141bf2;color:#fff;border:1px solid #2b3744;border-radius:8px;padding:6px 12px;font:inherit;font-size:14px;cursor:pointer}#tools button[aria-pressed=true]{background:#e5202e;border-color:#e5202e}#tools button:focus-visible{outline:3px solid #ff5a66;outline-offset:2px}
+.badge{display:inline-block;font-size:12.5px;border:1px solid var(--line);border-radius:99px;padding:1px 10px;color:var(--mut);margin-bottom:6px}
+details.how{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:14px;font-size:14px}details.how summary{cursor:pointer;font-weight:700}details.how table{width:100%;border-collapse:collapse;margin-top:8px}details.how td{padding:3px 0;border-top:1px solid var(--line)}details.how td:last-child{text-align:right;font-weight:700}
+@media(max-width:800px){#kpi{max-width:100%;top:auto;bottom:44px}}
+.note{font-size:13px;color:var(--mut);margin-top:14px}
+#card{position:absolute;top:12px;right:12px;width:min(300px,calc(100% - 24px));background:#0e141bf2;color:#fff;border:1px solid #2b3744;border-radius:12px;padding:12px 40px 12px 14px;display:none;font-size:15px}#card .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}#card .tag{background:#2b3744;border-radius:6px;padding:3px 9px;font-size:14px}#card .tag.r{background:#e5202e}#card small{color:#c3ccd5;font-size:13.5px;display:block}#card button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff;font-size:24px;line-height:1;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="band"></div>
+<div class="app">
+<aside>
+  <div class="brand"><svg aria-label="Placeholder logo mark" viewBox="0 0 120 100"><g fill="#e5202e" stroke="#e5202e" stroke-width="6" stroke-linejoin="round"><path d="M60 0L84 24L60 48L36 24Z"/><path d="M34 42L58 66L34 90L10 66Z"/><path d="M86 42L110 66L86 90L62 66Z"/></g></svg>State Farm</div><span class="badge">Synthetic data · demo scenario</span><h1>Quiet Signal risk map</h1>
+  <p class="sub">Each house is colored by how urgently the people inside need help. Click a house to see why.</p>
+  <h2>Disaster</h2><div class="row" id="scn"></div>
+  <h2>Show only households with</h2><div class="row" id="chips"></div>
+  <h2>Risk level <span id="cnt" class="sub"></span></h2><div class="leg" id="leg"></div>
+  <h2>Check these first</h2><div class="top" id="top"></div>
+  <h2>Selected household</h2><div class="det" id="det">Click a house on the map.</div>
+  <details class="how"><summary>How the risk score works</summary><table><tr><td>Damage (from imagery)</td><td>up to 55</td></tr><tr><td>Depends on medical equipment</td><td>+18</td></tr><tr><td>Age 75 or older</td><td>+12</td></tr><tr><td>Thin cash cushion</td><td>+8</td></tr><tr><td>No car</td><td>+7</td></tr></table><p class="sub" style="margin-top:8px">Critical 55+, High 40–54, Elevated 25–39, Low under 25. Rules are transparent and every score can be explained and audited.</p></details>
+  <p class="note">Synthetic data. Risk only changes who is helped first. It never changes coverage or claim decisions, and people make the final call.</p>
+</aside>
+<main id="stage"><canvas id="c" tabindex="0" aria-label="3D map of 140 households colored by risk"></canvas><div id="tip"></div><div id="card" role="status"></div><div id="kpi"></div><div id="tools"><button data-v="reset">Reset view</button><button data-v="top">Top-down</button><button data-v="spin" aria-pressed="false">Auto-rotate</button></div><div class="hint">Drag to rotate · scroll to zoom · click a house</div></main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const W=14,D=10,SP=3,RW=5,gx=c=>c*SP+Math.floor(c/4)*RW,gz=r=>r*SP+Math.floor(r/2)*RW,TW=gx(W-1),TH=gz(D-1),LV=[0x2fb67c,0xf0c030,0xf08030,0xe5202e],LC=['#2fb67c','#f0c030','#f08030','#e5202e'],LN=['Low','Elevated','High','Critical'],LH=[1,1,1.15,1.35];
+const SCN={flood:{n:'Flood',s:7,f:(x,y)=>Math.max(0,1-Math.abs(y-4.5-1.6*Math.sin(x/2.3))/2.6),t:0x2f7fd0},
+fire:{n:'Wildfire',s:21,f:(x,y)=>Math.exp(-((x-9.5)**2+(y-3.5)**2)/16),t:0xe0702a},
+hail:{n:'Hailstorm',s:42,f:(x,y)=>.2+.7*Math.max(0,Math.sin((x+y)/1.7))*(1-y/12),t:0x9fb0c0}};
+const FILT=[['nocar','No car',h=>h.nc],['age','Age 75+',h=>h.a],['med','Medical equipment',h=>h.m],['cash','Thin cash cushion',h=>h.lc],['dmg','Major damage',h=>h.dm>=.5]];
+const ACT=['Self-service claim. No outreach needed.','Text a claim link and check back tomorrow.','Call within 4 hours and offer a claim visit.','Welfare check and drone pass now. Queue an emergency living advance for approval.'];
+const S={sc:'flood',on:new Set(),sel:null};
+const mul=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+let H=[],meshes=[],world=null,renderer;
+const canvas=document.getElementById('c'),stage=document.getElementById('stage');
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:true})}catch(e){stage.innerHTML='<p style="color:#fff;padding:20px">This browser can’t show 3D graphics. Try another browser.</p>'}
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,1,.1,300);
+scene.background=new THREE.Color(0x0e141b);
+scene.add(new THREE.AmbientLight(0xffffff,.75));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(20,40,15);scene.add(dl);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(TW+40,TH+40),new THREE.MeshLambertMaterial({color:0x121a23}));ground.rotation.x=-Math.PI/2;ground.position.y=-.25;scene.add(ground);
+const ring=new THREE.Mesh(new THREE.RingGeometry(1.5,1.9,40),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.05;ring.visible=false;scene.add(ring);
+(function roads(){
+  const rg=new THREE.Group(),cm=new THREE.MeshLambertMaterial({color:0x3a424b}),am=new THREE.MeshLambertMaterial({color:0x232a31}),dm=new THREE.MeshBasicMaterial({color:0xd6c76a});
+  const strip=(w,l,x,z,rot,m,y)=>{const s=new THREE.Mesh(new THREE.BoxGeometry(rot?w:l,.1,rot?l:w),m);s.position.set(x,y,z);rg.add(s)};
+  for(let k=1;k<D/2;k++){const z=gz(2*k-1)+(SP+RW)/2-TH/2;strip(RW-.3,TW+14,0,z,0,cm,-.15);strip(3.4,TW+14,0,z,0,am,-.1);for(let x=-TW/2-5;x<TW/2+6;x+=2.6)strip(.18,1.3,x,z,0,dm,-.04)}
+  for(let k=1;k<Math.ceil(W/4);k++){const x=gx(4*k-1)+(SP+RW)/2-TW/2;strip(RW-.3,TH+14,x,0,1,cm,-.15);strip(3.4,TH+14,x,0,1,am,-.1);for(let z=-TH/2-5;z<TH/2+6;z+=2.6)strip(.18,1.3,x,z,1,dm,-.04)}
+  scene.add(rg);
+})();
+function build(){
+  if(world)scene.remove(world);world=new THREE.Group();scene.add(world);
+  const sc=SCN[S.sc],r=mul(sc.s);H=[];meshes=[];
+  for(let y=0;y<D;y++)for(let x=0;x<W;x++){
+    const base=sc.f(x,y),dm=Math.min(1,Math.max(0,base+(r()-.5)*.3));
+    const age=r()<.2?75+Math.floor(r()*15):20+Math.floor(r()*55),a=age>=75,m=r()<.1,nc=r()<.15,lc=r()<.35;
+    const score=Math.round(dm*55+(a?12:0)+(m?18:0)+(nc?7:0)+(lc?8:0)),lv=score>=55?3:score>=40?2:score>=25?1:0;
+    const px=gx(x)-TW/2,pz=gz(y)-TH/2,i=H.length;
+    const tile=new THREE.Mesh(new THREE.BoxGeometry(SP-.25,.2,SP-.25),new THREE.MeshLambertMaterial({color:new THREE.Color(0x2a4a35).lerp(new THREE.Color(sc.t),Math.min(1,base*.9))}));
+    tile.position.set(px,-.1,pz);world.add(tile);
+    const fr=y%2?1:-1;
+    const dw=new THREE.Mesh(new THREE.BoxGeometry(.9,.04,1.2),new THREE.MeshLambertMaterial({color:0x6b737c}));dw.position.set(px+.45,.02,pz+fr*1.2);world.add(dw);
+    if(!nc){const cr=new THREE.Mesh(new THREE.BoxGeometry(.55,.3,.95),new THREE.MeshLambertMaterial({color:[0xb8c2cc,0x2b3a55,0x8c2f39,0xe8e8e8,0x3f5f4a][Math.floor(r()*5)]}));cr.position.set(px+.45,.2,pz+fr*1.2);world.add(cr)}
+    if(r()<.7){const tr=new THREE.Mesh(new THREE.ConeGeometry(.5,1.3,7),new THREE.MeshLambertMaterial({color:0x2f6b45}));tr.position.set(px-1,.7,pz-fr*.95);world.add(tr)}
+    const mat=new THREE.MeshLambertMaterial({transparent:true}),g=new THREE.Group();
+    const b=new THREE.Mesh(new THREE.BoxGeometry(1.6,1.2,1.6),mat),ro=new THREE.Mesh(new THREE.ConeGeometry(1.35,.9,4),mat);
+    b.position.y=.6;ro.position.y=1.65;ro.rotation.y=Math.PI/4;g.add(b,ro);g.position.set(px,0,pz);world.add(g);
+    b.userData.i=ro.userData.i=i;meshes.push(b,ro);
+    H.push({i,x,y,px,pz,dm,age,a,m,nc,lc,score,lv,g,mat});
+  }
+  S.sel=null;ring.visible=false;recolor();
+}
+const match=h=>[...S.on].every(k=>FILT.find(f=>f[0]===k)[2](h));
+function recolor(){
+  const cnt=[0,0,0,0];let n=0;
+  H.forEach(h=>{const ok=match(h);h.ok=ok;if(ok){cnt[h.lv]++;n++}h.mat.color.setHex(ok?LV[h.lv]:0x39434f);h.mat.opacity=ok?1:.3;h.g.scale.y=ok?LH[h.lv]:.8});
+  ui(cnt,n);
+}
+const why=h=>[`Age ${h.age}${h.a?' (75+)':''}`,h.m&&'Depends on medical equipment',h.nc&&'No car, so can’t evacuate',h.lc&&'Thin cash cushion',`Damage: ${h.dm>=.7?'severe':h.dm>=.5?'major':h.dm>=.25?'moderate':'minor'} (estimated from imagery)`].filter(Boolean);
+function ui(cnt,n){
+  document.getElementById('scn').innerHTML=Object.keys(SCN).map(k=>`<label><input type="radio" name="sc" value="${k}" ${k===S.sc?'checked':''}>${SCN[k].n}</label>`).join('');
+  document.getElementById('chips').innerHTML=FILT.map(f=>`<button class="chip" data-f="${f[0]}" aria-pressed="${S.on.has(f[0])}">${f[1]}</button>`).join('');
+  document.getElementById('cnt').textContent=`· ${n} of ${H.length} households`;
+  document.getElementById('kpi').innerHTML=`<div style="border-left-color:#e5202e">Critical<b>${cnt[3]}</b></div><div style="border-left-color:#f08030">High<b>${cnt[2]}</b></div><div>${SCN[S.sc].n} · showing<b>${n}/${H.length}</b></div>`;
+  document.getElementById('leg').innerHTML=[3,2,1,0].map(l=>`<div><i style="background:${LC[l]}"></i>${LN[l]}<b>${cnt[l]}</b></div>`).join('');
+  const top=H.filter(h=>h.ok).sort((a,b)=>b.score-a.score).slice(0,5);
+  document.getElementById('top').innerHTML=top.map(h=>`<button data-h="${h.i}"><b>Household ${100+h.i}</b> · score ${h.score}<small>${why(h).slice(0,3).join(', ')}</small></button>`).join('')||'<p class="sub">No households match.</p>';
+  const h=H[S.sel];card(h);
+  document.getElementById('det').innerHTML=h?`<b>Household ${100+h.i}</b> · row ${h.y+1}, col ${h.x+1}<br><span class="pill" style="background:${LC[h.lv]};${h.lv===1?'color:#1a1a1a':''}">${LN[h.lv]} risk · score ${h.score}</span><ul>${why(h).map(t=>`<li>${t}</li>`).join('')}</ul><b>Suggested next step:</b> ${ACT[h.lv]}`:'Click a house on the map.';
+}
+function card(h){
+  const c=document.getElementById('card');if(!h){c.style.display='none';return}
+  const dl=h.dm>=.7?'Severe damage':h.dm>=.5?'Major damage':h.dm>=.25?'Moderate damage':'Minor damage';
+  const tags=[`<span class="tag ${h.a?'r':''}">Age ${h.age}</span>`,h.nc&&'<span class="tag r">No car</span>',h.lc&&'<span class="tag r">Thin cash cushion</span>',h.m&&'<span class="tag r">Medical equipment</span>',`<span class="tag ${h.dm>=.5?'r':''}">${dl}</span>`].filter(Boolean).join('');
+  c.innerHTML=`<button data-x aria-label="Close">×</button><b>Household ${100+h.i}</b><br><span class="pill" style="background:${LC[h.lv]};${h.lv===1?'color:#1a1a1a':''}">${LN[h.lv]} risk · score ${h.score}</span><div class="tags">${tags}</div><small>Red tags are the risk factors. Next step: ${ACT[h.lv]}</small>`;
+  c.style.display='block';
+}
+function select(i){S.sel=i;const h=H[i];ring.visible=true;ring.position.x=h.px;ring.position.z=h.pz;goal.set(h.px,0,h.pz);rad=Math.min(rad,30);ui(H.reduce((c,x)=>(x.ok&&c[x.lv]++,c),[0,0,0,0]),H.filter(x=>x.ok).length)}
+let th=.6,ph=1.0,rad=78;const tgt=new THREE.Vector3(),goal=new THREE.Vector3();
+function cam(){tgt.lerp(goal,.1);camera.position.set(tgt.x+rad*Math.sin(ph)*Math.sin(th),tgt.y+rad*Math.cos(ph),tgt.z+rad*Math.sin(ph)*Math.cos(th));camera.lookAt(tgt)}
+function rs(){const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}
+if(renderer){renderer.setPixelRatio(Math.min(devicePixelRatio,2));new ResizeObserver(rs).observe(stage);rs()}
+const rc=new THREE.Raycaster(),tip=document.getElementById('tip');let down=null,moved=0;
+function pick(e){const r=canvas.getBoundingClientRect();rc.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);const hit=rc.intersectObjects(meshes).find(m=>H[m.object.userData.i].ok);return hit?hit.object.userData.i:null}
+canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};moved=0;canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing'});
+canvas.addEventListener('pointermove',e=>{
+  if(down){const dx=e.clientX-down.x,dy=e.clientY-down.y;moved+=Math.abs(dx)+Math.abs(dy);th-=dx*.006;ph=Math.min(1.45,Math.max(.25,ph-dy*.006));down={x:e.clientX,y:e.clientY};tip.style.display='none';return}
+  const i=pick(e);if(i==null){tip.style.display='none';return}
+  const h=H[i],r=stage.getBoundingClientRect();tip.textContent=`Household ${100+i} · ${LN[h.lv]} risk`;tip.style.display='block';tip.style.left=e.clientX-r.left+14+'px';tip.style.top=e.clientY-r.top+14+'px'});
+canvas.addEventListener('pointerup',e=>{down=null;canvas.style.cursor='grab';if(moved<6){const i=pick(e);if(i!=null)select(i)}});
+canvas.addEventListener('wheel',e=>{e.preventDefault();rad=Math.min(140,Math.max(14,rad*(1+e.deltaY*.001)))},{passive:false});
+document.addEventListener('click',e=>{
+  const f=e.target.closest('[data-f]');if(f){S.on.has(f.dataset.f)?S.on.delete(f.dataset.f):S.on.add(f.dataset.f);recolor();return}
+  const t=e.target.closest('[data-h]');if(t)select(+t.dataset.h);if(e.target.closest('[data-x]')){S.sel=null;ring.visible=false;recolor()}});
+let spin=false;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;const v=b.dataset.v;
+  if(v==='spin'){spin=!spin;b.setAttribute('aria-pressed',spin);return}
+  if(v==='reset'){th=.6;ph=1.0;rad=78;goal.set(0,0,0);S.sel=null;ring.visible=false;recolor()}
+  if(v==='top'){ph=.25;rad=95;goal.set(0,0,0)}});
+document.addEventListener('change',e=>{if(e.target.name==='sc'){S.sc=e.target.value;build()}});
+build();
+(function loop(){requestAnimationFrame(loop);if(!renderer)return;if(spin&&!down)th+=.0025;cam();ring.scale.setScalar(1+.12*Math.sin(Date.now()/250));renderer.render(scene,camera)})();
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiet Signal: AI triage of incoming messages</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f4f4;--ink:#1a1a1a;--card:#fff;--line:#d9d9d9;--mut:#5c5c5c;--red:#e5202e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}}
+:root[data-theme="dark"]{--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Source Sans 3","Helvetica Neue",Arial,sans-serif}
+.band{height:10px;background:#e5202e}
+.wrap{max-width:820px;margin:0 auto;padding:22px 16px 60px}
+h1{font-size:clamp(28px,5.5vw,48px);line-height:1.05;margin:8px 0 10px;font-weight:800;letter-spacing:-.03em;max-width:18ch}
+.lede{color:var(--mut);max-width:62ch;margin:0 0 18px}
+.badge{font-size:13px;border:1px solid var(--line);border-radius:99px;padding:2px 10px;color:var(--mut);background:var(--card)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 14px;font:inherit;font-size:15px;cursor:pointer}
+.chip[aria-pressed=true]{background:#e5202e;border-color:#e5202e;color:#fff}
+.chip:focus-visible,a:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+#sum{color:var(--mut);font-size:15px;margin:0 0 12px}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+li{background:var(--card);border:1px solid var(--line);border-left-width:8px;border-radius:12px;padding:14px 16px}
+.msg{font-size:18px;font-weight:600;margin:0 0 8px}
+.pill{display:inline-block;border-radius:6px;padding:1px 9px;font-weight:700;font-size:14px;color:#fff;margin-right:6px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 9px;font-size:14px;color:var(--mut)}
+.why{margin:8px 0 0;font-size:15px}.why span{color:var(--mut)}
+.note{font-size:13.5px;color:var(--mut);margin-top:22px;max-width:70ch}
+a{color:var(--red);font-weight:600}
+</style>
+</head>
+<body>
+<div class="band"></div>
+<div class="wrap">
+  <span class="badge">16 synthetic messages · results pre-run through an LLM</span>
+  <h1>Read every message. Rank by need, not by who wrote first.</h1>
+  <p class="lede">After a disaster, thousands of texts, calls and claims arrive at once. An AI model reads each one, pulls out the need type and urgency, and explains its ranking in plain words. A person reviews the list and makes every decision.</p>
+  <div class="chips" id="chips"></div>
+  <p id="sum"></p>
+  <ul id="list"></ul>
+  <p class="note">All messages are made up. Rankings were produced ahead of time by an LLM and checked by a person, so nothing here calls an AI live. The AI only suggests an order. It never changes coverage or claim decisions. Real use would need customer consent and local responder coordination.</p>
+  <p><a href="index.html">← Back to the 3D risk map</a></p>
+</div>
+<script>
+const LV={5:['Critical','#e5202e'],4:['Urgent','#f08030'],3:['Soon','#f0c030'],2:['Routine','#2fb67c'],1:['Low','#6b7c8c']};
+const M=[
+{m:"My dad is on oxygen and our power has been out since last night. The tank is almost empty.",u:5,t:"Medical equipment",r:"Oxygen supply is running out and there is no power to refill it. Hours matter."},
+{m:"Water is up to our porch and my grandmother can’t walk. We’re on the second floor.",u:5,t:"Evacuation",r:"Rising water plus a person who cannot move on their own."},
+{m:"I need my insulin out of the fridge, but there’s been no power for two days and it’s getting warm.",u:5,t:"Medical supplies",r:"Insulin spoils without cold storage, and a missed dose is dangerous."},
+{m:"There’s a strong gas smell on our street and now inside our house.",u:5,t:"Safety hazard",r:"Possible gas leak. Risk of fire or poisoning, and it affects neighbors too."},
+{m:"No cell service at my mom’s and I haven’t heard from her since the fire. She uses a wheelchair.",u:5,t:"Welfare check",r:"Silent, mobility-limited and in the fire zone. Silence here is a warning sign."},
+{m:"The house is gone. We have nowhere to sleep tonight and three kids.",u:4,t:"Shelter",r:"Safe now but with no shelter tonight. Children are involved."},
+{m:"I live alone, I’m 82, I have had no heat since the storm and I can’t drive.",u:4,t:"Welfare check",r:"Older, isolated and cold with no transport. Likely to get worse each day."},
+{m:"I’m out of my heart medication and the pharmacy is closed because of the flooding.",u:4,t:"Medical supplies",r:"A missed heart medication is risky within a day or two."},
+{m:"Hello, I don’t speak much English. No one has come to our building and we have no power.",u:3,t:"Outreach gap",r:"Possibly overlooked because of language. Needs a translator and a visit, not just a text."},
+{m:"Trees fell across the road. We can’t get out, but nobody is hurt.",u:3,t:"Road access",r:"No injuries, but they are stuck. Becomes urgent if supplies run short."},
+{m:"The roof is torn off and rain is pouring in, but we’re all okay at my sister’s house.",u:2,t:"Property damage",r:"Safe place to stay. The damage is real but can wait for an adjuster visit."},
+{m:"We have no water, but we’re okay. Our neighbors are sharing.",u:2,t:"Supplies",r:"Basic need is being met for now. Flag for a water drop later."},
+{m:"The basement flooded and we lost a lot of stuff. I’m really upset.",u:2,t:"Property damage",r:"Emotional distress, but no safety risk. Offer a friendly callback."},
+{m:"My rental car is needed because mine was flooded. Just by next week is fine.",u:2,t:"Claim question",r:"Not time-critical. Can follow the normal claim process."},
+{m:"The fence blew down. Can I file a claim online?",u:1,t:"Claim question",r:"Minor damage and a simple question. A self-service link is enough."},
+{m:"Hail dented my car and cracked the windshield.",u:1,t:"Vehicle claim",r:"Vehicle damage only, with no risk to anyone’s safety."}
+];
+let f=0;
+function draw(){
+  const rows=M.filter(x=>!f||x.u===f).sort((a,b)=>b.u-a.u);
+  document.getElementById('chips').innerHTML=[0,5,4,3,2,1].map(n=>`<button class="chip" data-f="${n}" aria-pressed="${n===f}">${n?n+' '+LV[n][0]:'All'}</button>`).join('');
+  document.getElementById('sum').textContent=`Showing ${rows.length} of ${M.length} messages, most urgent first.`;
+  document.getElementById('list').innerHTML=rows.map(x=>`<li style="border-left-color:${LV[x.u][1]}"><p class="msg">“${x.m}”</p><span class="pill" style="background:${LV[x.u][1]};${x.u===3?'color:#1a1a1a':''}">${x.u} · ${LV[x.u][0]}</span><span class="tag">${x.t}</span><p class="why"><span>Why the AI ranked it here:</span> ${x.r}</p></li>`).join('');
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b){f=+b.dataset.f;draw()}});
+draw();
+</script>
+</body>
+</html>

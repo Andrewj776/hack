@@ -49,4 +49,131 @@ app.get('/api/activity', (req, res) =>
 
 app.post('/api/reset', (_, res) => { db.exec('DELETE FROM cases; DELETE FROM activity;'); res.json({ ok: true }); });
 
+/* ===== Victim Assistance Requests ===== */
+
+// Create a separate table for resident-submitted requests.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS assistance_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    location TEXT NOT NULL,
+    injuries TEXT NOT NULL,
+    urgent_needs TEXT NOT NULL,
+    communication_methods TEXT NOT NULL,
+    contact_details TEXT,
+    additional_details TEXT,
+    status TEXT NOT NULL DEFAULT 'New',
+    team TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+// Residents submit assistance requests.
+app.post('/api/requests', (req, res) => {
+  const {
+    location,
+    injuries,
+    urgent_needs,
+    communication_methods,
+    contact_details = '',
+    additional_details = ''
+  } = req.body || {};
+
+  const valid = value =>
+    typeof value === 'string' &&
+    value.trim().length > 0 &&
+    value.length <= 2000;
+
+  if (![location, injuries, urgent_needs, communication_methods].every(valid)) {
+    return res.status(400).json({
+      error: 'Location, injuries, urgent needs, and communication methods are required.'
+    });
+  }
+
+  if (
+    typeof contact_details !== 'string' ||
+    typeof additional_details !== 'string' ||
+    contact_details.length > 2000 ||
+    additional_details.length > 2000
+  ) {
+    return res.status(400).json({ error: 'Invalid additional information.' });
+  }
+
+  const result = db.prepare(`
+    INSERT INTO assistance_requests
+    (location, injuries, urgent_needs, communication_methods,
+     contact_details, additional_details)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(
+    location.trim(),
+    injuries.trim(),
+    urgent_needs.trim(),
+    communication_methods.trim(),
+    contact_details.trim(),
+    additional_details.trim()
+  );
+
+  res.status(201).json({
+    ok: true,
+    id: result.lastInsertRowid,
+    message: 'Assistance request received.'
+  });
+});
+
+// Responders retrieve submitted requests.
+app.get('/api/requests', (req, res) => {
+  const requests = db.prepare(`
+    SELECT * FROM assistance_requests
+    ORDER BY
+      CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END,
+      created_at DESC,
+      id DESC
+  `).all();
+
+  res.json(requests);
+});
+
+// Responders update team assignments and case statuses.
+app.patch('/api/requests/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const { team, status } = req.body || {};
+
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    return res.status(400).json({ error: 'Invalid request ID.' });
+  }
+
+  if (team !== undefined && team !== null && !TEAMS.includes(team)) {
+    return res.status(400).json({ error: 'Invalid team.' });
+  }
+
+  if (status !== undefined && !STATUSES.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status.' });
+  }
+
+  const existing = db.prepare(
+    'SELECT * FROM assistance_requests WHERE id = ?'
+  ).get(id);
+
+  if (!existing) {
+    return res.status(404).json({ error: 'Request not found.' });
+  }
+
+  const nextTeam = team === undefined ? existing.team : team;
+  let nextStatus = status === undefined ? existing.status : status;
+
+  if (nextTeam && nextStatus === 'New') nextStatus = 'Assigned';
+
+  db.prepare(`
+    UPDATE assistance_requests
+    SET team = ?, status = ?
+    WHERE id = ?
+  `).run(nextTeam, nextStatus, id);
+
+  res.json({
+    ok: true,
+    request: db.prepare(
+      'SELECT * FROM assistance_requests WHERE id = ?'
+    ).get(id)
+  });
+});
+
 app.listen(process.env.PORT || 3000, () => console.log('Quiet Signal on http://localhost:' + (process.env.PORT || 3000)));

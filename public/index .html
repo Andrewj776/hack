@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiet Signal: 3D disaster risk map</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f4f4;--ink:#1a1a1a;--card:#fff;--line:#d9d9d9;--mut:#5c5c5c;--red:#e5202e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}}
+:root[data-theme="dark"]{--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}
+*{box-sizing:border-box}html,body{height:100%;margin:0}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 "Source Sans 3","Helvetica Neue",Arial,sans-serif}
+.band{height:10px;background:#e5202e}.brand{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:800;font-size:20px}.brand svg{width:38px;height:32px}.app{display:grid;grid-template-columns:370px 1fr;height:calc(100% - 54px)}
+aside{overflow:auto;padding:16px;border-right:6px solid #e5202e}
+#stage{position:relative;min-height:55vh;background:#0e141b}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+@media(max-width:800px){.app{grid-template-columns:1fr;height:auto}#stage{order:-1;height:60vh}aside{border-right:0;border-top:6px solid #e5202e}}
+h1{font-size:26px;line-height:1.1;margin:0 0 4px;font-weight:800}h2{font-size:15px;margin:16px 0 6px;font-weight:700}
+.sub{color:var(--mut);font-size:14.5px;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+.row label,.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 12px;font:inherit;font-size:14.5px;cursor:pointer;position:relative}
+.row input{position:absolute;opacity:0}
+.row label:has(input:checked),.chip[aria-pressed=true]{background:#e5202e;border-color:#e5202e;color:#fff}
+.row label:has(input:focus-visible),.chip:focus-visible,.top button:focus-visible,canvas:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.leg div{display:flex;align-items:center;gap:8px;padding:3px 0}.leg i{width:16px;height:16px;border-radius:4px;display:block}.leg b{margin-left:auto;font-size:18px}
+.top button{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 10px;margin-bottom:6px;font:inherit;font-size:14.5px;cursor:pointer}
+.top small{display:block;color:var(--mut)}
+.det{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:15px}
+.det ul{margin:6px 0;padding-left:18px}.pill{display:inline-block;color:#fff;border-radius:6px;padding:1px 9px;font-weight:700;font-size:14px}
+#tip{position:absolute;pointer-events:none;background:#000c;color:#fff;font-size:13px;padding:4px 8px;border-radius:6px;display:none;white-space:nowrap}
+.hint{position:absolute;left:12px;bottom:10px;color:#9fb0c0;font-size:13px;pointer-events:none}
+#kpi{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 340px)}#kpi div{background:#0e141bf2;border:1px solid #2b3744;border-left:4px solid #2b3744;border-radius:8px;padding:6px 12px;color:#c3ccd5;font-size:12.5px;line-height:1.2}#kpi b{display:block;font-size:24px;color:#fff}
+#tools{position:absolute;right:12px;bottom:12px;display:flex;gap:6px}#tools button{background:#0e141bf2;color:#fff;border:1px solid #2b3744;border-radius:8px;padding:6px 12px;font:inherit;font-size:14px;cursor:pointer}#tools button[aria-pressed=true]{background:#e5202e;border-color:#e5202e}#tools button:focus-visible{outline:3px solid #ff5a66;outline-offset:2px}
+.badge{display:inline-block;font-size:12.5px;border:1px solid var(--line);border-radius:99px;padding:1px 10px;color:var(--mut);margin-bottom:6px}
+details.how{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:14px;font-size:14px}details.how summary{cursor:pointer;font-weight:700}details.how table{width:100%;border-collapse:collapse;margin-top:8px}details.how td{padding:3px 0;border-top:1px solid var(--line)}details.how td:last-child{text-align:right;font-weight:700}
+@media(max-width:800px){#kpi{max-width:100%;top:auto;bottom:44px}}
+.tabs{display:flex;align-items:flex-end;gap:4px;height:44px;padding:0 12px;background:var(--card);border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;border-bottom:4px solid transparent;color:var(--mut);font:inherit;font-size:15px;font-weight:600;padding:8px 14px;cursor:pointer}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:#e5202e}
+.tabs button:focus-visible{outline:3px solid var(--red);outline-offset:-3px}
+#dash{display:none;height:calc(100% - 54px);overflow:hidden;padding:0}
+body.dash #dash,body.triage #triage{display:block}body.dash .app,body.triage .app{display:none}#triage{display:none;height:calc(100% - 54px);overflow:hidden;padding:0}
+#dash h1{font-size:28px;max-width:none}
+.dk{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+.dt{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:10px;padding:10px 14px}.dt small{display:block;color:var(--mut);font-size:13.5px}.dt b{font-size:32px;line-height:1.15}
+.dctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}.dctl span{color:var(--mut);font-size:14px;margin-left:8px}
+.dbtn{background:#e5202e;color:#fff;border:0;border-radius:8px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer}.dbtn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}.dbtn:focus-visible,.ab:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.dcols{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;align-items:start}@media(max-width:900px){.dcols{grid-template-columns:1fr}}
+.dcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}.dcard h2{margin-top:0}
+.dcard table{width:100%;border-collapse:collapse;font-size:14px}.dcard th{text-align:left;color:var(--mut);font-weight:600;padding:4px 6px 6px}.dcard td{padding:7px 6px;border-top:1px solid var(--line);vertical-align:top}.dcard td small{display:block;color:#3a86d6;font-size:12.5px}
+.tw{overflow-x:auto}
+.ab{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:3px 8px;margin:0 4px 4px 0;font:inherit;font-size:13px;cursor:pointer}.ab:disabled{opacity:.4;cursor:not-allowed}
+.rr{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:14px;margin-bottom:10px}.rb{grid-column:1/3;height:8px;background:var(--line);border-radius:4px;overflow:hidden}.rb i{display:block;height:100%;background:#e5202e}
+.sb{display:flex;height:16px;border-radius:8px;overflow:hidden;background:var(--line)}.sb i{display:block;height:100%}
+.sl2{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;margin-top:8px;color:var(--mut)}.sl2 b{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+#dl{margin:0;padding-left:20px;font-size:13.5px;max-height:240px;overflow:auto}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.note{font-size:13px;color:var(--mut);margin-top:14px}
+#card{position:absolute;top:12px;right:12px;width:min(300px,calc(100% - 24px));background:#0e141bf2;color:#fff;border:1px solid #2b3744;border-radius:12px;padding:12px 40px 12px 14px;display:none;font-size:15px}#card .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}#card .tag{background:#2b3744;border-radius:6px;padding:3px 9px;font-size:14px}#card .tag.r{background:#e5202e}#card small{color:#c3ccd5;font-size:13.5px;display:block}#card{max-height:calc(100% - 24px);overflow:auto}#card .ch{border-top:1px solid #2b3744;margin-top:8px;padding-top:8px}#card .cb{position:static;display:block;width:100%;text-align:left;background:#1d2733;border:1px solid #2b3744;border-radius:8px;padding:7px 10px;margin-top:6px;font-size:14px;line-height:1.3;color:#fff;cursor:pointer}#card .cb:disabled{opacity:.4;cursor:not-allowed}#card .cb:hover:not(:disabled){border-color:#e5202e}#card .cb small{display:inline;margin-left:6px;color:#9fb0c0;font-size:13px}.case-field{display:block;margin-top:8px;font-size:13px}.case-field select{display:block;width:100%;background:#1d2733;color:#fff;border:1px solid #455568;border-radius:6px;padding:6px}#card button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff;font-size:24px;line-height:1;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="band"></div>
+<div class="tabs" role="tablist"><button role="tab" id="tab-map" aria-selected="true" data-tab="map">3D risk map</button><button role="tab" id="tab-dash" aria-selected="false" data-tab="dash">Responder dashboard</button><button role="tab" id="tab-triage" aria-selected="false" data-tab="triage">AI triage</button></div>
+<div class="app">
+<aside>
+  <div class="brand"><svg aria-label="Placeholder logo mark" viewBox="0 0 120 100"><g fill="#e5202e" stroke="#e5202e" stroke-width="6" stroke-linejoin="round"><path d="M60 0L84 24L60 48L36 24Z"/><path d="M34 42L58 66L34 90L10 66Z"/><path d="M86 42L110 66L86 90L62 66Z"/></g></svg>Quiet Signal</div><span class="badge">Synthetic data · demo scenario</span><h1>Quiet Signal risk map</h1>
+  <p class="sub">Each house is colored by how urgently the people inside need help. Click a house to see why.</p>
+  <h2>Disaster</h2><div class="row" id="scn"></div>
+  <h2>Show only households with</h2><div class="row" id="chips"></div>
+  <h2>Risk level <span id="cnt" class="sub"></span></h2><div class="leg" id="leg"></div>
+  <h2>Check these first</h2><div class="top" id="top"></div>
+  <h2>Selected household</h2><div class="det" id="det">Click a house on the map.</div>
+  <details class="how"><summary>How the risk score works</summary><table><tr><td>Disaster impact (from imagery and outage data)</td><td>up to 50</td></tr><tr><td>Depends on medical equipment</td><td>+16</td></tr><tr><td>Age 75 or older</td><td>+10</td></tr><tr><td>Limited mobility</td><td>+9</td></tr><tr><td>No car</td><td>+6</td></tr><tr><td>Thin cash cushion</td><td>+6</td></tr><tr><td>Lives alone</td><td>+6</td></tr><tr><td>Limited English</td><td>+5</td></tr><tr><td>Young children</td><td>+5</td></tr><tr><td>Underinsured</td><td>+5</td></tr></table><p class="sub" style="margin-top:8px">Critical 55+, High 40–54, Elevated 25–39, Low under 25. Rules are transparent and every score can be explained and audited.</p></details>
+  <p class="note">Synthetic data. Risk only changes who is helped first. It never changes coverage or claim decisions, and people make the final call.</p>
+</aside>
+<main id="stage"><canvas id="c" tabindex="0" aria-label="3D map of 140 households colored by risk"></canvas><div id="tip"></div><div id="card" role="status"></div><div id="kpi"></div><div id="tools"><button data-v="reset">Reset view</button><button data-v="top">Top-down</button><button data-v="spin" aria-pressed="false">Auto-rotate</button></div><div class="hint">Drag to rotate · scroll to zoom · click a house</div></main>
+</div>
+<section id="dash" aria-label="dash"><iframe title="dash" style="width:100%;height:100%;border:0;display:block" src="/dashboard.html"></iframe></section><section id="triage" aria-label="triage"><iframe title="triage" style="width:100%;height:100%;border:0;display:block" src="/triage.html"></iframe></section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const W=14,D=10,SP=3,RW=5,gx=c=>c*SP+Math.floor(c/4)*RW,gz=r=>r*SP+Math.floor(r/2)*RW,TW=gx(W-1),TH=gz(D-1),LV=[0x2fb67c,0xf0c030,0xf08030,0xe5202e],LC=['#2fb67c','#f0c030','#f08030','#e5202e'],LN=['Low','Elevated','High','Critical'],LH=[1,1,1.15,1.35];
+const SCN={flood:{n:'Flood',s:7,f:(x,y)=>Math.max(0,1-Math.abs(y-4.5-1.6*Math.sin(x/2.3))/2.6),t:0x2f7fd0,imp:'Flood damage'},
+fire:{n:'Wildfire',s:21,f:(x,y)=>Math.exp(-((x-9.5)**2+(y-3.5)**2)/16),t:0xe0702a,imp:'Fire damage'},
+hail:{n:'Hailstorm',s:42,f:(x,y)=>.2+.7*Math.max(0,Math.sin((x+y)/1.7))*(1-y/12),t:0x9fb0c0,imp:'Hail damage'},
+quake:{n:'Earthquake',s:63,f:(x,y)=>Math.min(1,Math.exp(-((x-4.5)**2+(y-5)**2)/26)+.25*Math.max(0,1-Math.abs(y-(1+.7*x))/1.2)),t:0xa07850,imp:'Structural damage'},
+tornado:{n:'Tornado',s:84,f:(x,y)=>Math.pow(Math.max(0,1-Math.abs(y-(1.2+.55*x))/1.7),1.2),t:0x8a6fb0,imp:'Wind damage'},
+hurricane:{n:'Hurricane',s:105,f:(x,y)=>Math.min(1,.15+.7*Math.pow(y/(D-1),1.4)+.12*Math.sin(x/1.8)),t:0x2a6f9a,imp:'Storm surge and wind damage'},
+winter:{n:'Winter storm',s:126,f:(x,y)=>.4+.5*Math.sin(x/2.6+1)*Math.cos(y/2.2),t:0xbfd6ea,imp:'Power and heat loss'},
+heat:{n:'Heat wave',s:147,f:(x,y)=>.1+.75*Math.exp(-((x-3)**2+(y-6.5)**2)/22),t:0xd9a441,imp:'Heat exposure and power loss'}};
+const FILT=[['alone','Lives alone',h=>h.ls],['mob','Limited mobility',h=>h.mob],['lep','Limited English',h=>h.lep],['kid','Young children',h=>h.kid],['uins','Underinsured',h=>h.ui],['nocar','No car',h=>h.nc],['age','Age 75+',h=>h.a],['med','Medical equipment',h=>h.m],['cash','Thin cash cushion',h=>h.lc],['dmg','Severe impact',h=>h.dm>=.5]];
+const ACT=['Monitor and provide information as needed.','Offer information and follow-up.','Prioritize a welfare check and coordinate assistance.','Urgent human review and welfare check; contact emergency services when appropriate.'];
+const S={sc:localStorage.getItem('qs-scn')||'flood',on:new Set(),sel:null};
+let API_HOUSEHOLDS=[];
+const mul=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+let H=[],meshes=[],world=null,renderer,beacons=[];
+const canvas=document.getElementById('c'),stage=document.getElementById('stage');
+let glErr='';
+if(typeof THREE==='undefined'){glErr='the 3D library did not load';const mkStub=()=>new Proxy(function(){},{get:(t,k)=>k===Symbol.toPrimitive?()=>0:(k==='then'?undefined:mkStub()),apply:()=>mkStub(),construct:()=>mkStub(),set:()=>true});globalThis.THREE=new Proxy({},{get:()=>function(){return mkStub()}})}
+else{for(const o of [{canvas,antialias:true},{canvas,antialias:false,powerPreference:'low-power'}]){try{renderer=new THREE.WebGLRenderer(o);glErr='';break}catch(e){glErr=(e&&e.message)||'WebGL is unavailable'}}}
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,1,.1,300);
+scene.background=new THREE.Color(0x0e141b);
+scene.add(new THREE.AmbientLight(0xffffff,.75));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(20,40,15);scene.add(dl);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(TW+40,TH+40),new THREE.MeshLambertMaterial({color:0x121a23}));ground.rotation.x=-Math.PI/2;ground.position.y=-.25;scene.add(ground);
+const ring=new THREE.Mesh(new THREE.RingGeometry(1.5,1.9,40),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.05;ring.visible=false;scene.add(ring);
+(function roads(){
+  const rg=new THREE.Group(),cm=new THREE.MeshLambertMaterial({color:0x3a424b}),am=new THREE.MeshLambertMaterial({color:0x232a31}),dm=new THREE.MeshBasicMaterial({color:0xd6c76a});
+  const strip=(w,l,x,z,rot,m,y)=>{const s=new THREE.Mesh(new THREE.BoxGeometry(rot?w:l,.1,rot?l:w),m);s.position.set(x,y,z);rg.add(s)};
+  for(let k=1;k<D/2;k++){const z=gz(2*k-1)+(SP+RW)/2-TH/2;strip(RW-.3,TW+14,0,z,0,cm,-.15);strip(3.4,TW+14,0,z,0,am,-.1);for(let x=-TW/2-5;x<TW/2+6;x+=2.6)strip(.18,1.3,x,z,0,dm,-.04)}
+  for(let k=1;k<Math.ceil(W/4);k++){const x=gx(4*k-1)+(SP+RW)/2-TW/2;strip(RW-.3,TH+14,x,0,1,cm,-.15);strip(3.4,TH+14,x,0,1,am,-.1);for(let z=-TH/2-5;z<TH/2+6;z+=2.6)strip(.18,1.3,x,z,1,dm,-.04)}
+  scene.add(rg);
+})();
+function build(){
+  if(world)scene.remove(world);world=new THREE.Group();scene.add(world);
+  const sc=SCN[S.sc],r=mul(sc.s);H=[];meshes=[];beacons=[];
+  for(let y=0;y<D;y++)for(let x=0;x<W;x++){
+    const record=API_HOUSEHOLDS.find(q=>q.x===x&&q.y===y);
+    if(!record)continue;
+    const base=sc.f(x,y),dm=record.damage,age=record.age,a=age>=75,m=!!record.medical,nc=!!record.no_car,lc=!!record.low_cash;
+    const ls=!!record.lives_alone,mob=!!record.mobility,lep=!!record.lep,kid=!!record.kids,ui=!!record.underinsured;
+    const score=record.score,lv=record.level;
+    const px=gx(x)-TW/2,pz=gz(y)-TH/2,i=H.length;
+    const tile=new THREE.Mesh(new THREE.BoxGeometry(SP-.25,.2,SP-.25),new THREE.MeshLambertMaterial({color:new THREE.Color(0x2a4a35).lerp(new THREE.Color(sc.t),Math.min(1,base*.9))}));
+    tile.position.set(px,-.1,pz);world.add(tile);
+    const fr=y%2?1:-1;
+    const dw=new THREE.Mesh(new THREE.BoxGeometry(.9,.04,1.2),new THREE.MeshLambertMaterial({color:0x6b737c}));dw.position.set(px+.45,.02,pz+fr*1.2);world.add(dw);
+    if(!nc){const cr=new THREE.Mesh(new THREE.BoxGeometry(.55,.3,.95),new THREE.MeshLambertMaterial({color:[0xb8c2cc,0x2b3a55,0x8c2f39,0xe8e8e8,0x3f5f4a][Math.floor(r()*5)]}));cr.position.set(px+.45,.2,pz+fr*1.2);world.add(cr)}
+    if(r()<.7){const tr=new THREE.Mesh(new THREE.ConeGeometry(.5,1.3,7),new THREE.MeshLambertMaterial({color:0x2f6b45}));tr.position.set(px-1,.7,pz-fr*.95);world.add(tr)}
+    const mat=new THREE.MeshLambertMaterial({transparent:true}),g=new THREE.Group();
+    const b=new THREE.Mesh(new THREE.BoxGeometry(1.6,1.2,1.6),mat),ro=new THREE.Mesh(new THREE.ConeGeometry(1.35,.9,4),mat);
+    b.position.y=.6;ro.position.y=1.65;ro.rotation.y=Math.PI/4;g.add(b,ro);g.position.set(px,0,pz);world.add(g);
+    if(lv===3){const bm=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:.3,depthWrite:false}),beam=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,3.2,8),bm);beam.position.set(px,3.4,pz);world.add(beam);
+      const rings=[0,.5].map(o=>{const m=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}),rg=new THREE.Mesh(new THREE.RingGeometry(.85,1,32),m);rg.rotation.x=-Math.PI/2;rg.position.set(px,2.9,pz);world.add(rg);return{rg,m,o}});beacons.push({i,beam,rings})}
+    b.userData.i=ro.userData.i=i;meshes.push(b,ro);
+    H.push({i,id:record.id,x,y,px,pz,dm,age,a,m,nc,lc,ls,mob,lep,kid,ui,score,lv,g,mat,team:record.team,status:record.status,contacted:record.contacted});
+  }
+  S.sel=null;ring.visible=false;recolor();
+}
+const match=h=>[...S.on].every(k=>FILT.find(f=>f[0]===k)[2](h));
+function recolor(){
+  const cnt=[0,0,0,0];let n=0;
+  H.forEach(h=>{const ok=match(h);h.ok=ok;if(ok){cnt[h.lv]++;n++}h.mat.color.setHex(ok?LV[h.lv]:0x39434f);h.mat.opacity=ok?1:.3;h.g.scale.y=ok?LH[h.lv]:.8});
+  ui(cnt,n);
+}
+const why=h=>[`Age ${h.age}${h.a?' (75+)':''}`,h.m&&'Depends on medical equipment',h.nc&&'No car, so can’t evacuate',h.lc&&'Thin cash cushion',h.ls&&'Lives alone',h.mob&&'Limited mobility',h.lep&&'Limited English, may need a translator',h.kid&&'Young children in the home',h.ui&&'Underinsured, may face out-of-pocket costs',`${SCN[S.sc].imp}: ${h.dm>=.7?'severe':h.dm>=.5?'major':h.dm>=.25?'moderate':'minor'} (estimated)`].filter(Boolean);
+function ui(cnt,n){
+  document.getElementById('scn').innerHTML=Object.keys(SCN).map(k=>`<label><input type="radio" name="sc" value="${k}" ${k===S.sc?'checked':''}>${SCN[k].n}</label>`).join('');
+  document.getElementById('chips').innerHTML=FILT.map(f=>`<button class="chip" data-f="${f[0]}" aria-pressed="${S.on.has(f[0])}">${f[1]}</button>`).join('');
+  document.getElementById('cnt').textContent=`· ${n} of ${H.length} households`;
+  document.getElementById('kpi').innerHTML=`<div style="border-left-color:#e5202e">Critical<b>${cnt[3]}</b></div><div style="border-left-color:#f08030">High<b>${cnt[2]}</b></div><div>${SCN[S.sc].n} · showing<b>${n}/${H.length}</b></div>`;
+  document.getElementById('leg').innerHTML=[3,2,1,0].map(l=>`<div><i style="background:${LC[l]}"></i>${LN[l]}<b>${cnt[l]}</b></div>`).join('');
+  const top=H.filter(h=>h.ok).sort((a,b)=>b.score-a.score).slice(0,5);
+  document.getElementById('top').innerHTML=top.map(h=>`<button data-h="${h.i}"><b>Household ${100+h.id}</b> · score ${h.score}<small>${why(h).slice(0,3).join(', ')}</small></button>`).join('')||'<p class="sub">No households match.</p>';
+  const h=S.sel===null?null:H[S.sel];card(h);
+  document.getElementById('det').innerHTML=h?`<b>Household ${100+h.id}</b> · row ${h.y+1}, col ${h.x+1}<br><span class="pill" style="background:${LC[h.lv]};${h.lv===1?'color:#1a1a1a':''}">${LN[h.lv]} risk · score ${h.score}</span><ul>${why(h).map(t=>`<li>${t}</li>`).join('')}</ul><b>Suggested next step:</b> ${ACT[h.lv]}`:'Click a house on the map.';
+}
+function card(h){
+  const c=document.getElementById('card');if(!h){c.style.display='none';return}
+  const dl=(h.dm>=.7?'Severe':h.dm>=.5?'Major':h.dm>=.25?'Moderate':'Minor')+' '+SCN[S.sc].imp.toLowerCase();
+  const tags=[`<span class="tag ${h.a?'r':''}">Age ${h.age}</span>`,h.nc&&'<span class="tag r">No car</span>',h.lc&&'<span class="tag r">Thin cash cushion</span>',h.m&&'<span class="tag r">Medical equipment</span>',h.mob&&'<span class="tag r">Limited mobility</span>',h.ls&&'<span class="tag r">Lives alone</span>',h.lep&&'<span class="tag r">Limited English</span>',h.kid&&'<span class="tag r">Young children</span>',h.ui&&'<span class="tag r">Underinsured</span>',`<span class="tag ${h.dm>=.5?'r':''}">${dl}</span>`].filter(Boolean).join('');
+  c.innerHTML=`<button data-x aria-label="Close">×</button><b>Household ${100+h.id}</b><br><span class="pill" style="background:${LC[h.lv]};${h.lv===1?'color:#1a1a1a':''}">${LN[h.lv]} risk · score ${h.score}</span><div class="tags">${tags}</div><small>Red tags are the risk factors. Suggested: ${ACT[h.lv]}</small>${choices(h)}`;
+  c.style.display='block';
+}
+function select(i){S.sel=i;const h=H[i];ring.visible=true;ring.position.x=h.px;ring.position.z=h.pz;goal.set(h.px,0,h.pz);GT.x=h.px;GT.z=h.pz;rad=Math.min(rad,30);ui(H.reduce((c,x)=>(x.ok&&c[x.lv]++,c),[0,0,0,0]),H.filter(x=>x.ok).length)}
+let th=.6,ph=1.0,rad=78;const tgt=new THREE.Vector3(),goal=new THREE.Vector3();
+function cam(){tgt.lerp(goal,.1);camera.position.set(tgt.x+rad*Math.sin(ph)*Math.sin(th),tgt.y+rad*Math.cos(ph),tgt.z+rad*Math.sin(ph)*Math.cos(th));camera.lookAt(tgt)}
+function rs(){const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}
+if(renderer){renderer.setPixelRatio(Math.min(devicePixelRatio,2));new ResizeObserver(rs).observe(stage);rs()}
+const rc=new THREE.Raycaster(),tip=document.getElementById('tip');let down=null,moved=0;
+function pick(e){const r=canvas.getBoundingClientRect();rc.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);const hit=rc.intersectObjects(meshes).find(m=>H[m.object.userData.i].ok);return hit?hit.object.userData.i:null}
+canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};moved=0;canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing'});
+canvas.addEventListener('pointermove',e=>{
+  if(down){const dx=e.clientX-down.x,dy=e.clientY-down.y;moved+=Math.abs(dx)+Math.abs(dy);th-=dx*.006;ph=Math.min(1.45,Math.max(.25,ph-dy*.006));down={x:e.clientX,y:e.clientY};tip.style.display='none';return}
+  const i=pick(e);if(i==null){tip.style.display='none';return}
+  const h=H[i],r=stage.getBoundingClientRect();tip.textContent=`Household ${100+H[i].id} · ${LN[h.lv]} risk`;tip.style.display='block';tip.style.left=e.clientX-r.left+14+'px';tip.style.top=e.clientY-r.top+14+'px'});
+canvas.addEventListener('pointerup',e=>{down=null;canvas.style.cursor='grab';if(moved<6){const i=pick(e);if(i!=null)select(i)}});
+canvas.addEventListener('wheel',e=>{e.preventDefault();rad=Math.min(140,Math.max(14,rad*(1+e.deltaY*.001)))},{passive:false});
+document.addEventListener('click',e=>{
+  const f=e.target.closest('[data-f]');if(f){S.on.has(f.dataset.f)?S.on.delete(f.dataset.f):S.on.add(f.dataset.f);recolor();return}
+  const t=e.target.closest('[data-h]');if(t)select(+t.dataset.h);if(e.target.closest('[data-x]')){S.sel=null;ring.visible=false;recolor()}});
+// Case assignments are stored in the shared SQLite backend, not simulated in this browser.
+async function patchCase(h, change) {
+  try {
+    const response=await fetch('/api/cases/'+h.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(change)});
+    if(!response.ok)throw new Error('Update failed: '+response.status);
+    const data=await response.json();
+    h.team=data.team;h.status=data.status;h.contacted=data.contacted;
+    recolor();
+  } catch(err) { alert('Could not save this change: '+err.message); }
+}
+function choices(h){
+  const teams=['Alpha','Bravo','Charlie','Delta'];
+  const statuses=['New','Assigned','En route','Resolved'];
+  return `<div class="ch"><b>Responder coordination</b><small>Changes save to the shared database.</small>
+  <label class="case-field">Team <select id="map-team"><option value="">Unassigned</option>${teams.map(t=>`<option value="${t}" ${h.team===t?'selected':''}>${t}</option>`).join('')}</select></label>
+  <label class="case-field">Status <select id="map-status" ${h.team?'':'disabled'}>${statuses.map(s=>`<option ${h.status===s?'selected':''}>${s}</option>`).join('')}</select></label>
+  <button class="cb" id="map-contact">${h.contacted?'Mark not contacted':'Mark contacted'}</button>
+  <small>${h.contacted?'Contacted':'Not contacted'} · ${h.status||'New'}</small></div>`;
+}
+document.addEventListener('change',e=>{
+  if(e.target.id==='map-team'&&S.sel!==null)patchCase(H[S.sel],{team:e.target.value||null});
+  if(e.target.id==='map-status'&&S.sel!==null)patchCase(H[S.sel],{status:e.target.value});
+});
+document.addEventListener('click',e=>{
+  if(e.target.id==='map-contact'&&S.sel!==null)patchCase(H[S.sel],{contacted:!H[S.sel].contacted});
+  const tab=e.target.closest('[data-tab]');if(tab)setTab(tab.dataset.tab);
+});
+function setTab(t){
+ document.body.classList.toggle('dash',t==='dash');document.body.classList.toggle('triage',t==='triage');
+ for(const k of ['map','dash','triage'])document.getElementById('tab-'+k).setAttribute('aria-selected',k===t);
+}
+let cv2=null,dnSoft=null,mvSoft=0,SF=[];const GT={x:0,z:0,cx:0,cz:0};
+/* Software 3D view, used only when the browser can't start WebGL. */
+function init2d(){
+  canvas.style.display='none';cv2=document.createElement('canvas');cv2.style.cssText='position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none';cv2.setAttribute('aria-label','3D map of households colored by risk');stage.insertBefore(cv2,canvas.nextSibling);
+  const n=document.createElement('div');n.style.cssText='position:absolute;left:12px;right:12px;bottom:30px;color:#ffd27a;font-size:13px;pointer-events:none';n.textContent='Hardware 3D (WebGL) is not available here ('+glErr+'), so this is a simplified 3D view. For the full-quality view, open the page in Chrome or Edge with hardware acceleration turned on.';stage.appendChild(n);
+  cv2.addEventListener('pointerdown',e=>{dnSoft={x:e.clientX,y:e.clientY};mvSoft=0;cv2.setPointerCapture(e.pointerId)});
+  cv2.addEventListener('pointermove',e=>{if(!dnSoft)return;const dx=e.clientX-dnSoft.x,dy=e.clientY-dnSoft.y;mvSoft+=Math.abs(dx)+Math.abs(dy);th-=dx*.006;ph=Math.min(1.45,Math.max(.25,ph-dy*.006));dnSoft={x:e.clientX,y:e.clientY}});
+  cv2.addEventListener('pointerup',e=>{const was=dnSoft;dnSoft=null;if(was&&mvSoft<6){const i=pickSoft(e);if(i!=null)select(i)}});
+  cv2.addEventListener('wheel',e=>{e.preventDefault();rad=Math.min(140,Math.max(14,rad*(1+e.deltaY*.001)))},{passive:false})}
+function pickSoft(e){const r=cv2.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;const c=SF.filter(s=>s.ok&&Math.hypot(s.x-mx,s.y-my)<s.r).sort((a,b)=>a.z-b.z);return c.length?c[0].i:null}
+const LDIR=(()=>{const l=[.4,.8,.45],m=Math.hypot(l[0],l[1],l[2]);return l.map(v=>v/m)})();
+const rgbk=(cn,k)=>'rgb('+Math.round((cn>>16&255)*k)+','+Math.round((cn>>8&255)*k)+','+Math.round((cn&255)*k)+')';
+function soft(){
+  if(!cv2||!H.length)return;
+  const rc=stage.getBoundingClientRect(),dpr=window.devicePixelRatio||1,w=rc.width,vh=rc.height;if(!w)return;
+  const pw=Math.round(w*dpr),pH=Math.round(vh*dpr);if(cv2.width!==pw||cv2.height!==pH){cv2.width=pw;cv2.height=pH}
+  if(spin&&!dnSoft)th+=.0025;
+  GT.cx+=(GT.x-GT.cx)*.1;GT.cz+=(GT.z-GT.cz)*.1;
+  const c=cv2.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.globalAlpha=1;c.fillStyle='#0e141b';c.fillRect(0,0,w,vh);
+  const cam=[GT.cx+rad*Math.sin(ph)*Math.sin(th),rad*Math.cos(ph),GT.cz+rad*Math.sin(ph)*Math.cos(th)];
+  let f=[GT.cx-cam[0],-cam[1],GT.cz-cam[2]];const fl=Math.hypot(f[0],f[1],f[2]);f=f.map(v=>v/fl);
+  let rt=[-f[2],0,f[0]];const rl=Math.hypot(rt[0],rt[2])||1;rt=[rt[0]/rl,0,rt[2]/rl];
+  const u=[rt[1]*f[2]-rt[2]*f[1],rt[2]*f[0]-rt[0]*f[2],rt[0]*f[1]-rt[1]*f[0]],F=(vh/2)/Math.tan(22.5*Math.PI/180);
+  const dz=p=>(p[0]-cam[0])*f[0]+(p[1]-cam[1])*f[1]+(p[2]-cam[2])*f[2];
+  const P=(x,y,z)=>{const vx=x-cam[0],vy=y-cam[1],vz=z-cam[2],zz=vx*f[0]+vy*f[1]+vz*f[2];if(zz<.5)return null;return[w/2+(vx*rt[0]+vy*rt[1]+vz*rt[2])/zz*F,vh/2-(vx*u[0]+vy*u[1]+vz*u[2])/zz*F,zz]};
+  const poly=(pts,fill,al,st)=>{const q=pts.map(p=>P(p[0],p[1],p[2]));if(q.some(v=>!v))return;c.globalAlpha=al;c.fillStyle=fill;c.beginPath();q.forEach((v,j)=>j?c.lineTo(v[0],v[1]):c.moveTo(v[0],v[1]));c.closePath();c.fill();if(st){c.strokeStyle=st;c.lineWidth=1;c.stroke()}};
+  const quad=(x,z,hx,hz,y)=>[[x-hx,y,z-hz],[x+hx,y,z-hz],[x+hx,y,z+hz],[x-hx,y,z+hz]];
+  poly(quad(0,0,TW/2+22,TH/2+22,-.25),'#121a23',1);
+  for(let k=1;k<D/2;k++)poly(quad(0,gz(2*k-1)+(SP+RW)/2-TH/2,TW/2+7,(RW-.3)/2,-.1),'#2c343c',1);
+  for(let k=1;k<Math.ceil(W/4);k++)poly(quad(gx(4*k-1)+(SP+RW)/2-TW/2,0,(RW-.3)/2,TH/2+7,-.1),'#2c343c',1);
+  const tint=SCN[S.sc].t,tr=tint>>16&255,tg2=tint>>8&255,tb=tint&255;
+  H.forEach(h=>{const t=Math.min(1,h.dm*.9),col='rgb('+Math.round(42+(tr-42)*t)+','+Math.round(74+(tg2-74)*t)+','+Math.round(53+(tb-53)*t)+')';
+    poly(quad(h.px,h.pz,(SP-.25)/2,(SP-.25)/2,0),col,1);
+    const fr=h.y%2?1:-1;poly(quad(h.px+.45,h.pz+fr*1.2,.45,.6,.02),'#6b737c',1)});
+  if(S.sel!=null&&H[S.sel]){const h=H[S.sel],pt=[];for(let a=0;a<28;a++){const an=a/28*Math.PI*2;pt.push([h.px+Math.cos(an)*1.7,.05,h.pz+Math.sin(an)*1.7])}poly(pt,'rgba(255,255,255,.25)',1,'#fff')}
+  SF=[];const t=Date.now()/1000;
+  H.map(h=>({h,z:dz([h.px,1,h.pz])})).sort((a,b)=>b.z-a.z).forEach(o=>{
+    const h=o.h,ok=h.ok,s2=ok?LH[h.lv]:.8,base=ok?LV[h.lv]:0x39434f,al=ok?1:.35,px=h.px,pz=h.pz,a=.8,b=.955,Hb=1.2*s2,Ha=2.1*s2,Hr=Ha-Hb;
+    const F4=[[[[px+a,0,pz-a],[px+a,Hb,pz-a],[px+a,Hb,pz+a],[px+a,0,pz+a]],[1,0,0]],[[[px-a,0,pz-a],[px-a,Hb,pz-a],[px-a,Hb,pz+a],[px-a,0,pz+a]],[-1,0,0]],[[[px-a,0,pz+a],[px-a,Hb,pz+a],[px+a,Hb,pz+a],[px+a,0,pz+a]],[0,0,1]],[[[px-a,0,pz-a],[px-a,Hb,pz-a],[px+a,Hb,pz-a],[px+a,0,pz-a]],[0,0,-1]],
+      [[[px+b,Hb,pz-b],[px+b,Hb,pz+b],[px,Ha,pz]],[Hr,b,0]],[[[px-b,Hb,pz-b],[px-b,Hb,pz+b],[px,Ha,pz]],[-Hr,b,0]],[[[px-b,Hb,pz+b],[px+b,Hb,pz+b],[px,Ha,pz]],[0,b,Hr]],[[[px-b,Hb,pz-b],[px+b,Hb,pz-b],[px,Ha,pz]],[0,b,-Hr]]];
+    F4.map(fc=>({fc,z:fc[0].reduce((s,p)=>s+dz(p),0)/fc[0].length})).sort((p,q)=>q.z-p.z).forEach(o2=>{const n=o2.fc[1],nl=Math.hypot(n[0],n[1],n[2]),dt=Math.max(0,(n[0]*LDIR[0]+n[1]*LDIR[1]+n[2]*LDIR[2])/nl);poly(o2.fc[0],rgbk(base,.55+.45*dt),al,'rgba(0,0,0,.35)')});
+    if(ok&&h.lv===3){const bt=P(px,1.8,pz),bb=P(px,5,pz);if(bt&&bb){c.globalAlpha=.3;c.strokeStyle='#ff4d5a';c.lineWidth=3;c.beginPath();c.moveTo(bt[0],bt[1]);c.lineTo(bb[0],bb[1]);c.stroke()}
+      [0,.5].forEach(of=>{const p0=(t/1.8+of)%1,r0=(.7+p0*1.8)*.92,pt=[];for(let q=0;q<22;q++){const an=q/22*Math.PI*2;pt.push([px+Math.cos(an)*r0,2.9,pz+Math.sin(an)*r0])}const pp=pt.map(v=>P(v[0],v[1],v[2]));if(pp.some(v=>!v))return;c.globalAlpha=.55*(1-p0);c.strokeStyle='#ff4d5a';c.lineWidth=2;c.beginPath();pp.forEach((v,j)=>j?c.lineTo(v[0],v[1]):c.moveTo(v[0],v[1]));c.closePath();c.stroke()})}
+    const cp=P(px,1,pz);if(cp)SF.push({i:h.i,ok,x:cp[0],y:cp[1],r:1.5/cp[2]*F,z:cp[2]})});
+  c.globalAlpha=1}
+let spin=false;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;const v=b.dataset.v;
+  if(v==='spin'){spin=!spin;b.setAttribute('aria-pressed',spin);return}
+  if(v==='reset'){th=.6;ph=1.0;rad=78;goal.set(0,0,0);GT.x=0;GT.z=0;S.sel=null;ring.visible=false;recolor()}
+  if(v==='top'){ph=.25;rad=95;goal.set(0,0,0);GT.x=0;GT.z=0}});
+async function loadHouseholds(){
+ try {
+  const response=await fetch('/api/households?scenario='+encodeURIComponent(S.sc));
+  if(!response.ok)throw new Error('Server returned '+response.status);
+  API_HOUSEHOLDS=await response.json();build();
+ } catch(err) { document.getElementById('det').textContent='Could not load household data: '+err.message; }
+}
+document.addEventListener('change',e=>{if(e.target.name==='sc'){S.sc=e.target.value;localStorage.setItem('qs-scn',S.sc);loadHouseholds()}});
+loadHouseholds();
+setInterval(async()=>{
+ if(document.activeElement?.tagName==='SELECT')return;
+ try{const response=await fetch('/api/households?scenario='+encodeURIComponent(S.sc));if(!response.ok)return;
+ const rows=await response.json();for(const row of rows){const h=H.find(x=>x.id===row.id);if(h){h.team=row.team;h.status=row.status;h.contacted=row.contacted;}}
+ if(S.sel!==null&&H[S.sel]){card(H[S.sel]);}
+ }catch(e){}
+},5000);
+if(!renderer)init2d();(function loop(){requestAnimationFrame(loop);if(!renderer){soft();return}if(spin&&!down)th+=.0025;cam();animBeacons();ring.scale.setScalar(1+.12*Math.sin(Date.now()/250));renderer.render(scene,camera)})();
+</script>
+</body>
+</html>

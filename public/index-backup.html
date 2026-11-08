@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quiet Signal: risk map</title><link rel="stylesheet" href="base.css">
+<style>
+.app{display:grid;grid-template-columns:340px 1fr;height:calc(100vh - 62px)}
+aside{overflow:auto;padding:14px}#stage{position:relative;background:#0e141b;min-height:50vh}canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.leg div{display:flex;gap:8px;align-items:center;padding:2px 0}.leg i{width:14px;height:14px;border-radius:4px}.leg b{margin-left:auto}
+.det{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}.det ul{padding-left:18px;margin:6px 0}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:end}.ctl label{font-size:13px;color:var(--mut);display:block}
+#tip{position:absolute;pointer-events:none;background:#000c;color:#fff;font-size:13px;padding:4px 8px;border-radius:6px;display:none}
+@media(max-width:800px){.app{grid-template-columns:1fr;height:auto}#stage{order:-1;height:60vh}}
+</style></head><body>
+<div id="nav"></div>
+<div class="app"><aside>
+  <h1 style="margin:0 0 4px">Quiet Signal risk map</h1>
+  <p class="note">Synthetic data. Each house is colored by how urgently its people need help. Click a house to see why.</p>
+  <h3>Risk level</h3><div class="leg" id="leg"></div>
+  <h3>Selected household</h3><div class="det" id="det">Click a house on the map.</div>
+  <p class="note">Risk only changes who is helped first. It never changes coverage or claim decisions.</p>
+</aside><main id="stage"><canvas id="c" aria-label="3D map of households colored by risk"></canvas><div id="tip"></div></main></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="shared.js"></script>
+<script>
+const COL=[0x2fb67c,0xf0c030,0xf08030,0xe5202e],HEX=['#2fb67c','#f0c030','#f08030','#e5202e'],NAMES=['Low','Elevated','High','Critical'],SP=3,RW=5;
+let H=[],META,sel=null,hit=[];
+const gx=c=>c*SP+Math.floor(c/4)*RW,gz=r=>r*SP+Math.floor(r/2)*RW;
+const canvas=document.getElementById('c'),stage=document.getElementById('stage');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true}),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,1,.1,300);
+scene.background=new THREE.Color(0x0e141b);scene.add(new THREE.AmbientLight(0xffffff,.75));
+const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(20,40,15);scene.add(dl);
+let world=null,th=.6,ph=1,rad=78,tx=0,tz=0;
+function resize(){const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(stage);
+function build(){
+  if(world)scene.remove(world);world=new THREE.Group();scene.add(world);hit=[];
+  const TW=gx(13),TH=gz(9);tx=0;tz=0;
+  H.forEach(h=>{
+    h.px=gx(h.x)-TW/2;h.pz=gz(h.y)-TH/2;
+    const m=new THREE.MeshLambertMaterial({color:COL[h.level]}),g=new THREE.Group();
+    const b=new THREE.Mesh(new THREE.BoxGeometry(1.6,1.2,1.6),m),r=new THREE.Mesh(new THREE.ConeGeometry(1.35,.9,4),m);
+    b.position.y=.6;r.position.y=1.65;r.rotation.y=Math.PI/4;g.add(b,r);g.position.set(h.px,0,h.pz);g.scale.y=h.level>=2?1.25:1;
+    b.userData.h=r.userData.h=h;hit.push(b,r);h.mat=m;world.add(g);
+  });
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(TW+40,TH+40),new THREE.MeshLambertMaterial({color:0x121a23}));
+  ground.rotation.x=-Math.PI/2;ground.position.y=-.05;world.add(ground);
+}
+function legend(){const c=[0,0,0,0];H.forEach(h=>c[h.level]++);
+  document.getElementById('leg').innerHTML=[3,2,1,0].map(l=>`<div><i style="background:${HEX[l]}"></i>${NAMES[l]}<b>${c[l]}</b></div>`).join('')}
+function detail(){
+  const h=H.find(x=>x.id===sel),el=document.getElementById('det');
+  if(!h){el.textContent='Click a house on the map.';return}
+  const next=['Self-service claim.','Text a claim link and check back tomorrow.','Call within 4 hours and offer a claim visit.','Welfare check now. Queue an emergency living advance for approval.'][h.level];
+  el.innerHTML=`<b>Household ${100+h.id}</b><br><span class="pill" style="background:${HEX[h.level]};${h.level===1?'color:#1a1a1a':''}">${NAMES[h.level]} · score ${h.score}</span>
+  <ul>${h.why.map(t=>`<li>${t}</li>`).join('')}</ul><b>Suggested next step:</b> ${next}
+  <div class="ctl"><label>Team<select id="team"><option value="">Unassigned</option>${META.teams.map(t=>`<option ${h.team===t?'selected':''}>${t}</option>`).join('')}</select></label>
+  <label>Status<select id="st">${META.statuses.map(s=>`<option ${h.status===s?'selected':''}>${s}</option>`).join('')}</select></label>
+  <button id="ct">${h.contacted?'Mark not contacted':'Mark contacted'}</button></div>`;
+  const save=async body=>{Object.assign(h,await api('/api/cases/'+h.id,{method:'PATCH',body:JSON.stringify(body)}));detail()};
+  document.getElementById('team').onchange=e=>save({team:e.target.value||null});
+  document.getElementById('st').onchange=e=>save({status:e.target.value});
+  document.getElementById('ct').onclick=()=>save({contacted:!h.contacted});
+}
+const rc=new THREE.Raycaster(),tip=document.getElementById('tip');let down=null,moved=0;
+const pick=e=>{const r=canvas.getBoundingClientRect();rc.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);const i=rc.intersectObjects(hit)[0];return i?i.object.userData.h:null};
+canvas.onpointerdown=e=>{down={x:e.clientX,y:e.clientY};moved=0;canvas.setPointerCapture(e.pointerId)};
+canvas.onpointermove=e=>{if(down){const dx=e.clientX-down.x,dy=e.clientY-down.y;moved+=Math.abs(dx)+Math.abs(dy);th-=dx*.006;ph=Math.min(1.45,Math.max(.25,ph-dy*.006));down={x:e.clientX,y:e.clientY};tip.style.display='none';return}
+  const h=pick(e),r=stage.getBoundingClientRect();if(!h){tip.style.display='none';return}
+  tip.textContent=`Household ${100+h.id} · ${NAMES[h.level]} risk`;tip.style.cssText+=`;display:block;left:${e.clientX-r.left+14}px;top:${e.clientY-r.top+14}px`};
+canvas.onpointerup=e=>{down=null;if(moved<6){const h=pick(e);if(h){sel=h.id;tx=h.px;tz=h.pz;detail()}}};
+canvas.addEventListener('wheel',e=>{e.preventDefault();rad=Math.min(140,Math.max(14,rad*(1+e.deltaY*.001)))},{passive:false});
+(function loop(){requestAnimationFrame(loop);
+  camera.position.set(tx+rad*Math.sin(ph)*Math.sin(th),rad*Math.cos(ph),tz+rad*Math.sin(ph)*Math.cos(th));camera.lookAt(tx,0,tz);renderer.render(scene,camera)})();
+async function load(){H=await api('/api/households?scenario='+getScenario());
+  H.forEach(h=>{const m=hit.length&&0});build();legend();detail()}
+(async()=>{META=await mountNav('/');resize();await load();
+  setInterval(async()=>{if(document.activeElement.tagName==='SELECT')return;
+    const f=await api('/api/households?scenario='+getScenario());
+    f.forEach(n=>{const h=H.find(x=>x.id===n.id);if(h)Object.assign(h,{team:n.team,status:n.status,contacted:n.contacted})});detail()},5000)})();
+</script></body></html>

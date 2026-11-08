@@ -73,6 +73,7 @@ body.dash #dash,body.triage #triage{display:block}body.dash .app,body.triage .ap
 .pinb svg{width:15px;height:15px;fill:#e5202e;flex:none}.trhist{list-style:none;margin:0;padding:0;display:grid;gap:8px}.trhist li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14.5px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
 .trhist small{display:block;color:var(--mut)}.trnote{margin-top:24px;font-size:13.5px;color:var(--mut)}
 #card .trn{margin-top:8px;border-left:3px solid #4aa8ff;padding-left:8px}
+#clear{display:none;position:absolute;left:50%;top:12px;transform:translateX(-50%);background:#2fb67c;color:#06231a;font-weight:800;padding:8px 18px;border-radius:99px;box-shadow:0 6px 20px #0006;z-index:5;pointer-events:none}
 </style>
 </head>
 <body>
@@ -90,7 +91,7 @@ body.dash #dash,body.triage #triage{display:block}body.dash .app,body.triage .ap
   <details class="how"><summary>How the risk score works</summary><table><tr><td>Disaster impact (from imagery and outage data)</td><td>up to 50</td></tr><tr><td>Depends on medical equipment</td><td>+16</td></tr><tr><td>Age 65 or older</td><td>+10</td></tr><tr><td>Limited mobility</td><td>+9</td></tr><tr><td>No car</td><td>+6</td></tr><tr><td>Thin cash cushion</td><td>+6</td></tr><tr><td>Lives alone</td><td>+6</td></tr><tr><td>Limited English</td><td>+5</td></tr><tr><td>Young children</td><td>+5</td></tr><tr><td>Underinsured</td><td>+5</td></tr></table><p class="sub" style="margin-top:8px">Critical 55+, High 40–54, Elevated 25–39, Low under 25. Rules are transparent and every score can be explained and audited.</p></details>
   <p class="note"><b>Data sources.</b> Risk-factor rates come from the CDC/ATSDR Social Vulnerability Index for Census Tract 215.17, Denton County, TX (65+, no vehicle, limited English, income below 150% of poverty, disability, under 18). The tract is larger than Meridian, so it is an approximation. Households, damage and the other factors are synthetic. Street layout, house positions and surrounding terrain (lake, creek, woods, park) are traced from OpenStreetMap (© OpenStreetMap contributors), so they are approximate.</p><p class="note">Risk only changes who is helped first. It never changes coverage or claim decisions, and people make the final call.</p>
 </aside>
-<main id="stage"><canvas id="c" tabindex="0" aria-label="3D map of Meridian households colored by risk"></canvas><div id="tip"></div><div id="card" role="status"></div><div id="kpi"></div><div id="tools"><button data-v="reset">Reset view</button><button data-v="top">Top-down</button><button data-v="spin" aria-pressed="false">Auto-rotate</button></div><div class="hint">Drag to rotate · scroll to zoom · click a house</div></main>
+<main id="stage"><canvas id="c" tabindex="0" aria-label="3D map of Meridian households colored by risk"></canvas><div id="clear" role="status">✓ All cases resolved. Meridian is clear.</div><div id="tip"></div><div id="card" role="status"></div><div id="kpi"></div><div id="tools"><button data-v="reset">Reset view</button><button data-v="top">Top-down</button><button data-v="spin" aria-pressed="false">Auto-rotate</button></div><div class="hint">Drag to rotate · scroll to zoom · click a house</div></main>
 </div>
 <section id="dash" aria-label="Responder dashboard"><iframe title="Responder dashboard" style="width:100%;height:100%;border:0;display:block" srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
@@ -210,10 +211,11 @@ let MR=[];
 function mapApply(m){let h=get(m.hid);
   if(!h){h={id:m.hid,zone:&#x27;&#x27;,loc:m.street,a:m.fx.a,m:m.fx.m,nc:m.fx.nc,lc:m.fx.lc,score:m.score,lv:Math.max(0,m.from-1),contacted:true,team:null,st:&#x27;New&#x27;,eta:null,x:1};D.push(h)}
   h.st=&#x27;Resolved&#x27;;h.contacted=true;h.eta=null}
-let SENT=new Set();
+let SENT=new Set(),ALL=false;
 function sync(){const now=new Set(D.filter(h=&gt;h.st===&#x27;Resolved&#x27;).map(h=&gt;h.id));
   now.forEach(id=&gt;{if(!SENT.has(id))parent.postMessage({qs:1,t:&#x27;status&#x27;,hid:id,resolved:true},&#x27;*&#x27;)});
-  SENT.forEach(id=&gt;{if(!now.has(id))parent.postMessage({qs:1,t:&#x27;status&#x27;,hid:id,resolved:false},&#x27;*&#x27;)});SENT=now}
+  SENT.forEach(id=&gt;{if(!now.has(id))parent.postMessage({qs:1,t:&#x27;status&#x27;,hid:id,resolved:false},&#x27;*&#x27;)});SENT=now;
+  const all=D.length&gt;0&amp;&amp;now.size===D.length;if(all!==ALL){ALL=all;parent.postMessage({qs:1,t:&#x27;allresolved&#x27;,value:all},&#x27;*&#x27;)}}
 function draw(){
   const unc=D.filter(h=&gt;!h.contacted),crit=unc.filter(h=&gt;h.lv===2).length;
   const act=D.filter(FIL.act[1]).length,res=D.filter(FIL.res[1]).length,pct=Math.round((D.length-unc.length)/D.length*100);
@@ -223,7 +225,7 @@ function draw(){
     `&lt;div class=&quot;tile amb&quot;&gt;&lt;span&gt;In progress&lt;/span&gt;&lt;strong&gt;${act}&lt;/strong&gt;&lt;/div&gt;`+
     `&lt;div class=&quot;tile grn&quot;&gt;&lt;span&gt;Resolved&lt;/span&gt;&lt;strong&gt;${res}&lt;/strong&gt;&lt;/div&gt;`;
   document.getElementById(&#x27;cov&#x27;).innerHTML=`&lt;div class=&quot;covh&quot;&gt;&lt;b&gt;${pct}% of flagged households reached&lt;/b&gt;&lt;span&gt;${D.length-unc.length} of ${D.length}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;bar&quot;&gt;&lt;em style=&quot;width:${pct}%&quot;&gt;&lt;/em&gt;&lt;/div&gt;`;
-  document.getElementById(&#x27;ctl&#x27;).innerHTML=`&lt;div class=&quot;clk&quot;&gt;&lt;span&gt;Simulated time&lt;/span&gt;&lt;b&gt;Hour ${HOUR}&lt;/b&gt;&lt;/div&gt;&lt;button class=&quot;chip pri&quot; data-x=&quot;auto&quot;&gt;Auto-assign by urgency&lt;/button&gt;&lt;button class=&quot;chip pri&quot; data-x=&quot;skip&quot;&gt;Skip 6 hours&lt;/button&gt;&lt;button class=&quot;chip&quot; data-x=&quot;reset&quot;&gt;Reset&lt;/button&gt;`;
+  document.getElementById(&#x27;ctl&#x27;).innerHTML=`&lt;div class=&quot;clk&quot;&gt;&lt;span&gt;Simulated time&lt;/span&gt;&lt;b&gt;Hour ${HOUR}&lt;/b&gt;&lt;/div&gt;&lt;button class=&quot;chip pri&quot; data-x=&quot;auto&quot;&gt;Auto-assign by urgency&lt;/button&gt;&lt;button class=&quot;chip pri&quot; data-x=&quot;skip&quot;&gt;Skip 6 hours&lt;/button&gt;&lt;button class=&quot;chip pri&quot; data-x=&quot;all&quot;&gt;Resolve all&lt;/button&gt;&lt;button class=&quot;chip&quot; data-x=&quot;reset&quot;&gt;Reset&lt;/button&gt;`;
   document.getElementById(&#x27;tri&#x27;).innerHTML=T.length?T.map(ev=&gt;`&lt;li style=&quot;--c:${TC[ev.to]}&quot;&gt;&lt;div class=&quot;mv&quot;&gt;&lt;b&gt;Household ${ev.hid}&lt;/b&gt; ${esc(ev.street||&#x27;&#x27;)} · ${TL[ev.from]} → &lt;b&gt;${TL[ev.to]}&lt;/b&gt; (score ${ev.fromScore} → ${ev.score})${pin(ev.hid)}&lt;/div&gt;&lt;div class=&quot;trq&quot;&gt;“${esc(ev.text.slice(0,160))}${ev.text.length&gt;160?&#x27;…&#x27;:&#x27;&#x27;}”&lt;/div&gt;&lt;small&gt;${ev.reasons.map(esc).join(&#x27; · &#x27;)}&lt;/small&gt;&lt;/li&gt;`).join(&#x27;&#x27;):&#x27;&lt;li style=&quot;--c:var(--line)&quot;&gt;No triage calls yet. Describe an emergency in the AI triage tab and it will appear here with a map pin.&lt;/li&gt;&#x27;;
   document.getElementById(&#x27;chips&#x27;).innerHTML=Object.keys(FIL).map(k=&gt;`&lt;button class=&quot;chip&quot; data-f=&quot;${k}&quot; aria-pressed=&quot;${k===f}&quot;&gt;${FIL[k][0]}&lt;/button&gt;`).join(&#x27;&#x27;);
   const cnt=t=&gt;D.filter(h=&gt;h.team===t&amp;&amp;h.st!==&#x27;Resolved&#x27;).length,mx=Math.max(1,...TEAMS.map(cnt));
@@ -249,7 +251,7 @@ document.addEventListener(&#x27;change&#x27;,e=&gt;{
   draw()});
 document.addEventListener(&#x27;click&#x27;,e=&gt;{
   const g=e.target.closest(&#x27;[data-g]&#x27;);if(g){parent.postMessage({qs:1,t:&#x27;goto&#x27;,hid:+g.dataset.g},&#x27;*&#x27;);return}
-  const x=e.target.closest(&#x27;[data-x]&#x27;);if(x){const a=x.dataset.x;if(a===&#x27;auto&#x27;)autoAssign();else if(a===&#x27;skip&#x27;)skip(6);else{HOUR=0;L=[];f=&#x27;all&#x27;;rebuild(false);draw()}return}
+  const x=e.target.closest(&#x27;[data-x]&#x27;);if(x){const a=x.dataset.x;if(a===&#x27;all&#x27;){D.forEach(h=&gt;{if(h.st!==&#x27;Resolved&#x27;){h.st=&#x27;Resolved&#x27;;h.contacted=true;h.eta=null}});note(&#x27;All cases resolved. The 3D map is clear.&#x27;);draw()}else if(a===&#x27;auto&#x27;)autoAssign();else if(a===&#x27;skip&#x27;)skip(6);else{HOUR=0;L=[];f=&#x27;all&#x27;;rebuild(false);draw()}return}
   const b=e.target.closest(&#x27;[data-f],[data-c]&#x27;);if(!b)return;
   if(b.dataset.f)f=b.dataset.f;
   else{const h=get(b.dataset.c);h.contacted=!h.contacted;note(`Household ${h.id} marked ${h.contacted?&#x27;contacted&#x27;:&#x27;not contacted&#x27;}`)}
@@ -311,6 +313,8 @@ const ring=new THREE.Mesh(new THREE.RingGeometry(1.5,1.9,40),new THREE.MeshBasic
   mk(MAP.c.map(r=>[(r[0]-OX)*K,(r[1]-OY)*K,(r[0]+r[2]-OX)*K,(r[1]+r[3]-OY)*K]),0x4aa3e8,-.03);
   scene.add(rg);
 })();
+let ALLCLEAR=false;const RESIDS=new Set();
+function reapplyClear(){H.forEach(h=>{if(h.lv>0&&(ALLCLEAR||RESIDS.has(h.i))){h.pre={score:h.score,lv:h.lv};h.res=1;if(ALLCLEAR)h.allr=1;h.lv=0;h.score=Math.min(h.score,24)}})}
 function addBeacon(i,px,pz){const bm=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:.3,depthWrite:false}),beam=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,3.2,8),bm);beam.position.set(px,3.4,pz);world.add(beam);
   const rings=[0,.5].map(o=>{const m=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}),rg=new THREE.Mesh(new THREE.RingGeometry(.85,1,32),m);rg.rotation.x=-Math.PI/2;rg.position.set(px,2.9,pz);world.add(rg);return{rg,m,o}});beacons.push({i,beam,rings})}
 function build(){
@@ -331,13 +335,13 @@ function build(){
     b.userData.i=ro.userData.i=i;meshes.push(b,ro);
     H.push({i,x,y,st,px,pz,dm,age,a,m,nc,lc,ls,mob,lep,kid,ui,score,lv,l0:lv,helps:0,done:[],g,mat});
   });
-  S.sel=null;ring.visible=false;recolor();
+  S.sel=null;ring.visible=false;reapplyClear();recolor();
 }
 const match=h=>[...S.on].every(k=>FILT.find(f=>f[0]===k)[2](h));
 function recolor(){
   const cnt=[0,0,0,0];let n=0;
   H.forEach(h=>{const ok=match(h);h.ok=ok;if(ok){cnt[h.lv]++;n++}h.mat.color.setHex(ok?LV[h.lv]:0x39434f);h.mat.opacity=ok?1:.3;h.g.scale.y=ok?LH[h.lv]:.8});
-  ui(cnt,n);if(window.triageFill)triageFill();
+  ui(cnt,n);{const cl=document.getElementById('clear');if(cl)cl.style.display=ALLCLEAR?'block':'none'}if(window.triageFill)triageFill();
 }
 const why=h=>[`Age ${h.age}${h.a?' (65+)':''}`,h.m&&'Depends on medical equipment',h.nc&&'No car, so can’t evacuate',h.lc&&'Thin cash cushion',h.ls&&'Lives alone',h.mob&&'Limited mobility',h.lep&&'Limited English, may need a translator',h.kid&&'Young children in the home',h.ui&&'Underinsured, may face out-of-pocket costs',`${SCN[S.sc].imp}: ${h.dm>=.7?'severe':h.dm>=.5?'major':h.dm>=.25?'moderate':'minor'} (estimated)`].filter(Boolean);
 function ui(cnt,n){
@@ -419,11 +423,11 @@ function choices(h){
 document.addEventListener('click',e=>{const C=e.target.closest('[data-ca]');if(!C)return;const[a,x]=C.dataset.ca.split(':'),i=+x,h=H[i];
   if(!h||!STEPS[a]||h.done.includes(a)||h.lv===0)return;
   h.done.push(a);h.helps++;h.lv--;h.score=Math.min(h.score,[24,39,54][h.lv]);
-  if(h.lv===0&&!h.res){h.res=1;h.pre={score:25,lv:1};toDash({t:'mapstatus',hid:100+h.i,resolved:true,from:Math.max(1,h.l0),score:25,street:MAP.s[h.st]||'',fx:{a:!!h.a,m:!!h.m,nc:!!h.nc,lc:!!h.lc}})}
+  if(h.lv===0&&!h.res){RESIDS.add(h.i);h.res=1;h.pre={score:25,lv:1};toDash({t:'mapstatus',hid:100+h.i,resolved:true,from:Math.max(1,h.l0),score:25,street:MAP.s[h.st]||'',fx:{a:!!h.a,m:!!h.m,nc:!!h.nc,lc:!!h.lc}})}
   recolor()});
 document.addEventListener('click',e=>{const R=e.target.closest('[data-res]');if(!R)return;const h=H[+R.dataset.res];if(!h)return;
-  if(h.res){h.res=0;if(h.pre){h.score=h.pre.score;h.lv=h.pre.lv}h.pre=null;if(h.lv===3&&!beacons.some(b=>b.i===h.i))addBeacon(h.i,h.px,h.pz);recolor();toDash({t:'mapstatus',hid:100+h.i,resolved:false})}
-  else if(h.lv>0){const o={score:h.score,lv:h.lv};h.pre=o;h.res=1;h.lv=0;h.score=Math.min(h.score,24);recolor();toDash({t:'mapstatus',hid:100+h.i,resolved:true,from:o.lv,score:o.score,street:MAP.s[h.st]||'',fx:{a:!!h.a,m:!!h.m,nc:!!h.nc,lc:!!h.lc}})}});
+  if(h.res){RESIDS.delete(h.i);h.res=0;if(h.pre){h.score=h.pre.score;h.lv=h.pre.lv}h.pre=null;if(h.lv===3&&!beacons.some(b=>b.i===h.i))addBeacon(h.i,h.px,h.pz);recolor();toDash({t:'mapstatus',hid:100+h.i,resolved:false})}
+  else if(h.lv>0){RESIDS.add(h.i);const o={score:h.score,lv:h.lv};h.pre=o;h.res=1;h.lv=0;h.score=Math.min(h.score,24);recolor();toDash({t:'mapstatus',hid:100+h.i,resolved:true,from:o.lv,score:o.score,street:MAP.s[h.st]||'',fx:{a:!!h.a,m:!!h.m,nc:!!h.nc,lc:!!h.lc}})}});
 function animBeacons(){const t=Date.now()/1000,still=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
   beacons.forEach(b=>{const on=!!(H[b.i]&&H[b.i].ok&&H[b.i].lv===3);b.beam.visible=on;b.rings.forEach(r=>{r.rg.visible=on;const ph=still?.3:((t/1.8+r.o)%1);r.rg.scale.setScalar(.7+ph*1.8);r.m.opacity=still?.35:.55*(1-ph)})})}
 let cv2=null,dnSoft=null,mvSoft=0,SF=[];const GT={x:0,z:0,cx:0,cz:0};
@@ -555,7 +559,12 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#trgo'))triageRun()});
 document.addEventListener('change',e=>{if(e.target.id==='trh')triageInfo()});
 window.addEventListener('message',e=>{const d=e.data;if(!d||d.qs!==1)return;const f=document.querySelector('#dash iframe');if(!f||e.source!==f.contentWindow)return;const i=(+d.hid)-100;
+  if(d.t==='allresolved'){ALLCLEAR=!!d.value;
+    if(d.value)H.forEach(h=>{if(!h.res&&h.lv>0){h.pre={score:h.score,lv:h.lv};h.res=1;h.allr=1;h.lv=0;h.score=Math.min(h.score,24)}});
+    else H.forEach(h=>{if(h.allr){h.allr=0;h.res=0;if(h.pre){h.score=h.pre.score;h.lv=h.pre.lv}h.pre=null;if(h.lv===3&&!beacons.some(b=>b.i===h.i))addBeacon(h.i,h.px,h.pz)}});
+    recolor();return}
   if(d.t==='status'){const h=H[i];if(!h)return;
+    if(d.resolved)RESIDS.add(i);else RESIDS.delete(i);
     if(d.resolved&&!h.res){h.pre={score:h.score,lv:h.lv};h.res=1;h.lv=0;h.score=Math.min(h.score,24);recolor()}
     else if(!d.resolved&&h.res){h.res=0;if(h.pre){h.score=h.pre.score;h.lv=h.pre.lv}h.pre=null;if(h.lv===3&&!beacons.some(b=>b.i===h.i))addBeacon(h.i,h.px,h.pz);recolor()}
     return}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request Assistance | Quiet Signal</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f4f4;--ink:#1a1a1a;--card:#fff;--line:#d9d9d9;--mut:#5c5c5c;--red:#e5202e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 'Source Sans 3',Arial,sans-serif}.band{height:10px;background:var(--red)}header{padding:18px max(18px,calc((100% - 760px)/2));background:#fff;border-bottom:1px solid var(--line)}header a{color:var(--red);text-decoration:none;font-weight:800}main{max-width:760px;margin:30px auto;padding:0 18px 40px}h1{font-size:32px;line-height:1.15;margin:0 0 8px}p{color:var(--mut)}form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;display:grid;gap:18px}label{font-weight:700;display:block;margin-bottom:6px}input,textarea,select{width:100%;font:inherit;border:1px solid #aaa;border-radius:8px;padding:11px;background:#fff;color:#111}textarea{min-height:90px;resize:vertical}fieldset{border:1px solid var(--line);border-radius:10px;padding:12px 16px}legend{font-weight:800;padding:0 6px}.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}.checks label{font-weight:400;display:flex;align-items:center;gap:8px;margin:0}.checks input{width:auto}.help{font-size:13px;color:var(--mut);margin-top:5px}.alert{background:#fff0f1;border-left:4px solid var(--red);padding:12px 16px;border-radius:6px;color:#5c1520;margin:16px 0}button{background:var(--red);color:#fff;border:0;border-radius:8px;padding:12px 18px;font:inherit;font-weight:800;cursor:pointer}button:disabled{opacity:.6;cursor:wait}#result{padding:14px;border-radius:8px;display:none}#result.success{display:block;background:#e5f7ea;color:#154b2b}#result.error{display:block;background:#fff0f1;color:#811c25}@media(max-width:600px){form{padding:16px}}
+</style>
+</head>
+<body>
+<div class="band"></div>
+<header><a href="/">Quiet Signal</a> · Resident assistance</header>
+<main>
+<h1>Request disaster assistance</h1>
+<p>Tell responders where you are and what help you need. This form is part of a hackathon demonstration and is <strong>not monitored by real emergency services</strong>.</p>
+<div class="alert"><strong>Immediate danger?</strong> Call 911 or your local emergency number if available. Submitting this demo form does not dispatch emergency responders.</div>
+<form id="requestForm">
+<div><label for="location">Your location *</label><textarea id="location" name="location" maxlength="500" required placeholder="Street address, nearby intersection, building, or landmark"></textarea></div>
+<div><label for="injuries">Injuries or medical concerns</label><textarea id="injuries" name="injuries" maxlength="1500" placeholder="Describe injuries, medical equipment needs, or write 'None known'"></textarea></div>
+<fieldset><legend>What assistance do you need? *</legend><div class="checks" id="needs">
+<label><input type="checkbox" value="Rescue / evacuation">Rescue / evacuation</label>
+<label><input type="checkbox" value="Medical assistance">Medical assistance</label>
+<label><input type="checkbox" value="Food / water">Food / water</label>
+<label><input type="checkbox" value="Shelter">Shelter</label>
+<label><input type="checkbox" value="Transportation">Transportation</label>
+<label><input type="checkbox" value="Other">Other</label>
+</div></fieldset>
+<fieldset><legend>How can responders reach you? *</legend><div class="checks" id="methods">
+<label><input type="checkbox" value="Phone call">Phone call</label>
+<label><input type="checkbox" value="Text / SMS">Text / SMS</label>
+<label><input type="checkbox" value="Email">Email</label>
+<label><input type="checkbox" value="Radio / in-person">Radio / in-person</label>
+</div></fieldset>
+<div><label for="contact">Contact information (optional)</label><input id="contact" name="contact" maxlength="250" placeholder="Phone number, email, or radio contact"><div class="help">Only provide contact details you are comfortable sharing in this demo.</div></div>
+<div><label for="details">Other information</label><textarea id="details" name="details" maxlength="1500" placeholder="Number of people, access issues, pets, or other useful information"></textarea></div>
+<button type="submit" id="submit">Submit assistance request</button>
+<div id="result" role="status" aria-live="polite"></div>
+</form>
+</main>
+<script>
+const form=document.getElementById('requestForm');
+form.addEventListener('submit',async event=>{
+ event.preventDefault();
+ const selected=id=>[...document.querySelectorAll(`#${id} input:checked`)].map(input=>input.value);
+ const needs=selected('needs'),methods=selected('methods'),result=document.getElementById('result');
+ if(!needs.length||!methods.length){result.className='error';result.textContent='Select at least one urgent need and one communication method.';return;}
+ const button=document.getElementById('submit');button.disabled=true;result.style.display='none';
+ try{
+  const response=await fetch('/api/assistance-requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:document.getElementById("location").value.trim(),injuries:document.getElementById("injuries").value.trim(),needs,methods,contact:document.getElementById("contact").value.trim(),details:document.getElementById("details").value.trim()})});
+  const data=await response.json();if(!response.ok)throw Error(data.error||'Unable to submit');
+  result.className='success';result.textContent=`Demo request #${data.id} submitted. This does not contact real emergency services.`;result.style.display='block';form.reset();
+ }catch(error){result.className='error';result.textContent=error.message;result.style.display='block';}
+ finally{button.disabled=false;}
+});
+</script>
+</body>
+</html>

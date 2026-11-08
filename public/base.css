@@ -1,0 +1,10 @@
+:root{--bg:#f4f4f4;--ink:#1a1a1a;--card:#fff;--line:#d9d9d9;--mut:#5c5c5c;--red:#e5202e;--c0:#2fb67c;--c1:#f0c030;--c2:#f08030;--c3:#e5202e}
+@media(prefers-color-scheme:dark){:root{--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Source Sans 3","Helvetica Neue",Arial,sans-serif}
+#nav{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 14px;background:var(--card);border-bottom:6px solid #e5202e}
+#nav a{padding:6px 14px;border-radius:99px;color:var(--ink);text-decoration:none;font-weight:600}
+#nav a[aria-current]{background:#e5202e;color:#fff}#nav label{margin-left:auto;color:var(--mut)}
+select,button{font:inherit;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.pill{display:inline-block;color:#fff;border-radius:6px;padding:1px 9px;font-weight:700;font-size:14px}
+.note{font-size:13px;color:var(--mut)}

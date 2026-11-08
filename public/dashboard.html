@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quiet Signal: responder dashboard</title><link rel="stylesheet" href="base.css">
+<style>
+.wrap{max-width:980px;margin:0 auto;padding:18px 14px 60px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.tile{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--line);border-radius:12px;padding:10px 14px}.tile b{display:block;font-size:34px;line-height:1.1}
+.tile.hot{border-top-color:var(--red)}.tile small{color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.chips button[aria-pressed=true]{background:#e5202e;border-color:#e5202e;color:#fff}
+ul.cases{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+ul.cases>li{display:grid;grid-template-columns:70px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+ul.cases>li.silent{border-color:#e5202e;box-shadow:0 0 0 2px #e5202e55}
+.sc{border-radius:10px;color:#fff;text-align:center;padding:6px 0;display:flex;flex-direction:column;justify-content:center}.sc strong{font-size:28px;line-height:1}.sc small{font-size:11px;font-weight:700}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 8px;font-size:13.5px;color:var(--mut);margin:4px 6px 0 0}.tag.bad{border-color:var(--red);color:var(--red);font-weight:700}.tag.ok{border-color:#0a8f6a;color:#0a8f6a;font-weight:700}
+.act{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px}.act label{font-size:13px;color:var(--mut);display:block}
+ol.log{list-style:none;padding:6px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--mut);font-size:14.5px}ol.log li{border-top:1px solid var(--line);padding:5px 0}ol.log li:first-child{border:0}
+</style></head><body><div id="nav"></div>
+<div class="wrap"><h1 style="margin:0">Who needs us, who’s on it, and who haven’t we reached?</h1>
+<p class="note">High and Critical households for the selected disaster. Changes are saved and shared with the map.</p>
+<div class="tiles" id="tiles"></div><div class="chips" id="chips"></div>
+<h2 id="count" style="font-size:16px"></h2><ul class="cases" id="list"></ul>
+<h2 style="font-size:16px">Activity log</h2><ol class="log" id="log"></ol>
+<p class="note">Synthetic data. Risk ranking only changes who is helped first. People make every assignment and status change.</p></div>
+<script src="shared.js"></script>
+<script>
+const COL=['#2fb67c','#f0c030','#f08030','#e5202e'],FIL={all:['All',h=>true],unc:['Not contacted',h=>!h.contacted],una:['No team yet',h=>!h.team],act:['In progress',h=>h.team&&h.status!=='Resolved'],res:['Resolved',h=>h.status==='Resolved']};
+let H=[],META,f='all';
+async function refresh(){
+  H=(await api('/api/households?scenario='+getScenario())).filter(h=>h.level>=2);
+  const log=await api('/api/activity?scenario='+getScenario());draw(log)}
+function draw(log){
+  const unc=H.filter(h=>!h.contacted),pct=Math.round((H.length-unc.length)/H.length*100)||0;
+  tiles.innerHTML=`<div class="tile"><small>Flagged households</small><b>${H.length}</b></div>
+  <div class="tile hot"><small>Not contacted</small><b>${unc.length}</b><small>${unc.filter(h=>h.level===3).length} critical</small></div>
+  <div class="tile"><small>In progress</small><b>${H.filter(FIL.act[1]).length}</b></div>
+  <div class="tile"><small>Resolved</small><b>${H.filter(FIL.res[1]).length}</b></div>
+  <div class="tile"><small>Reached</small><b>${pct}%</b></div>`;
+  chips.innerHTML=Object.keys(FIL).map(k=>`<button data-f="${k}" aria-pressed="${k===f}">${FIL[k][0]}</button>`).join('');
+  const rows=H.filter(FIL[f][1]).sort((a,b)=>b.score-a.score);
+  count.textContent=`${rows.length} households, most urgent first`;
+  list.innerHTML=rows.map(h=>`<li class="${!h.contacted&&h.level===3?'silent':''}"><div class="sc" style="background:${COL[h.level]};${h.level===1?'color:#1a1a1a':''}"><strong>${h.score}</strong><small>${h.levelName}</small></div>
+  <div><b>Household ${100+h.id}</b> ${h.contacted?'<span class="tag ok">Contacted</span>':'<span class="tag bad">Not contacted</span>'}
+  <div>${h.why.slice(0,-1).slice(1).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+  <div class="act"><label>Team<select data-t="${h.id}"><option value="">Unassigned</option>${META.teams.map(t=>`<option ${h.team===t?'selected':''}>${t}</option>`).join('')}</select></label>
+  <label>Status<select data-s="${h.id}" ${h.team?'':'disabled'}>${META.statuses.map(s=>`<option ${h.status===s?'selected':''}>${s}</option>`).join('')}</select></label>
+  <button data-c="${h.id}">${h.contacted?'Mark not contacted':'Mark contacted'}</button></div></div></li>`).join('')||'<li>No households match this view.</li>';
+  document.getElementById('log').innerHTML=log.map(a=>`<li>${new Date(a.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} · ${a.text}</li>`).join('')||'<li>No actions yet.</li>';
+}
+const save=async(id,body)=>{await api('/api/cases/'+id,{method:'PATCH',body:JSON.stringify(body)});refresh()};
+document.addEventListener('change',e=>{const d=e.target.dataset;
+  if(d.t)save(d.t,{team:e.target.value||null});if(d.s)save(d.s,{status:e.target.value})});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-f],[data-c]');if(!b)return;
+  if(b.dataset.f){f=b.dataset.f;draw([...document.querySelectorAll('#log li')].map(()=>null).length?undefined:[]);refresh()}
+  else{const h=H.find(x=>x.id==b.dataset.c);save(h.id,{contacted:!h.contacted})}});
+(async()=>{META=await mountNav('/dashboard.html');await refresh();
+  setInterval(()=>{if(document.activeElement.tagName!=='SELECT')refresh()},5000)})();
+</script></body></html>

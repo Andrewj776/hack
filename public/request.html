@@ -39,20 +39,73 @@
 <div id="result" role="status" aria-live="polite"></div>
 </form>
 </main>
+
 <script>
-const form=document.getElementById('requestForm');
-form.addEventListener('submit',async event=>{
- event.preventDefault();
- const selected=id=>[...document.querySelectorAll(`#${id} input:checked`)].map(input=>input.value);
- const needs=selected('needs'),methods=selected('methods'),result=document.getElementById('result');
- if(!needs.length||!methods.length){result.className='error';result.textContent='Select at least one urgent need and one communication method.';return;}
- const button=document.getElementById('submit');button.disabled=true;result.style.display='none';
- try{
-  const response=await fetch('/api/assistance-requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:document.getElementById("location").value.trim(),injuries:document.getElementById("injuries").value.trim(),needs,methods,contact:document.getElementById("contact").value.trim(),details:document.getElementById("details").value.trim()})});
-  const data=await response.json();if(!response.ok)throw Error(data.error||'Unable to submit');
-  result.className='success';result.textContent=`Demo request #${data.id} submitted. This does not contact real emergency services.`;result.style.display='block';form.reset();
- }catch(error){result.className='error';result.textContent=error.message;result.style.display='block';}
- finally{button.disabled=false;}
+const form = document.getElementById('requestForm');
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const selected = (id) =>
+    [...document.querySelectorAll(`#${id} input:checked`)]
+      .map(input => input.value);
+
+  const needs = selected('needs');
+  const methods = selected('methods');
+  const result = document.getElementById('result');
+  const button = document.getElementById('submit');
+
+  if (!needs.length || !methods.length) {
+    result.className = 'error';
+    result.textContent =
+      'Select at least one urgent need and one communication method.';
+    result.style.display = 'block';
+    return;
+  }
+
+  const requestData = {
+    location: document.getElementById('location').value.trim(),
+    injuries: document.getElementById('injuries').value.trim() || 'None known',
+    urgent_needs: needs.join(', '),
+    communication_methods: methods.join(', '),
+    contact_details: document.getElementById('contact').value.trim(),
+    additional_details: document.getElementById('details').value.trim()
+  };
+
+  button.disabled = true;
+  result.style.display = 'none';
+
+  try {
+    const response = await fetch('/api/requests', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Unable to submit request.');
+    }
+
+    result.className = 'success';
+    result.textContent =
+      `Demo request #${data.id} saved successfully. ` +
+      'This does not contact real emergency services.';
+    result.style.display = 'block';
+
+    form.reset();
+
+  } catch (error) {
+    result.className = 'error';
+    result.textContent = error.message;
+    result.style.display = 'block';
+
+  } finally {
+    button.disabled = false;
+  }
 });
 </script>
 </body>

@@ -58,6 +58,21 @@ body.dash #dash,body.triage #triage{display:block}body.dash .app,body.triage .ap
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
 .note{font-size:13px;color:var(--mut);margin-top:14px}
 #card{position:absolute;top:12px;right:12px;width:min(300px,calc(100% - 24px));background:#0e141bf2;color:#fff;border:1px solid #2b3744;border-radius:12px;padding:12px 40px 12px 14px;display:none;font-size:15px}#card .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}#card .tag{background:#2b3744;border-radius:6px;padding:3px 9px;font-size:14px}#card .tag.r{background:#e5202e}#card small{color:#c3ccd5;font-size:13.5px;display:block}#card{max-height:calc(100% - 24px);overflow:auto}#card .ch{border-top:1px solid #2b3744;margin-top:8px;padding-top:8px}#card .cb{position:static;display:block;width:100%;text-align:left;background:#1d2733;border:1px solid #2b3744;border-radius:8px;padding:7px 10px;margin-top:6px;font-size:14px;line-height:1.3;color:#fff;cursor:pointer}#card .cb:disabled{opacity:.4;cursor:not-allowed}#card .cb:hover:not(:disabled){border-color:#e5202e}#card .cb small{display:inline;margin-left:6px;color:#9fb0c0;font-size:13px}#card button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff;font-size:24px;line-height:1;cursor:pointer}
+
+#triage{overflow:auto;padding:0}
+.tr{max-width:760px;margin:0 auto;padding:22px 18px 60px}.tr h2{margin:0 0 6px;font-size:28px}.tr h3{margin:26px 0 8px;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.trl{color:var(--mut);margin:0 0 14px}.tr label{display:block;font-weight:700;margin:14px 0 4px}
+.tr select,.tr textarea{width:100%;font:inherit;font-size:16px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.tr textarea{resize:vertical}.tr select:focus-visible,.tr textarea:focus-visible,.tr button:focus-visible{outline:3px solid #e5202e;outline-offset:2px}
+.trinfo{margin-top:8px;font-size:14.5px;color:var(--mut)}.trinfo .tg{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 8px;margin:4px 6px 0 0}.trinfo .tg.r{border-color:#e5202e;color:#e5202e;font-weight:700}
+.trex{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.trex button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:4px 12px;font:inherit;font-size:14px;cursor:pointer}
+.trgo{margin-top:14px;background:#e5202e;color:#fff;border:0;border-radius:10px;padding:11px 20px;font:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.trres{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}.trres .mv{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:18px;font-weight:800}
+.lvp{display:inline-block;color:#fff;border-radius:6px;padding:1px 10px;font-size:15px;font-weight:700}.trres ul{margin:10px 0 0;padding-left:20px;color:var(--mut)}.trres .rec{margin-top:10px}
+.trres .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.trres .row button,.pinb{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 12px;font:inherit;font-size:14.5px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.pinb svg{width:15px;height:15px;fill:#e5202e;flex:none}.trhist{list-style:none;margin:0;padding:0;display:grid;gap:8px}.trhist li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14.5px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.trhist small{display:block;color:var(--mut)}.trnote{margin-top:24px;font-size:13.5px;color:var(--mut)}
+#card .trn{margin-top:8px;border-left:3px solid #4aa8ff;padding-left:8px}
 </style>
 </head>
 <body>
@@ -131,6 +146,9 @@ ol.step li.d{border-top-color:var(--ok);color:var(--ok)}ol.step li.n{border-top-
 select{font:inherit;font-size:15px;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);display:block;margin-top:2px}
 select:disabled{opacity:.5}
 ol.log{list-style:none;margin:0;padding:0;font-size:14.5px;color:var(--mut);background:var(--card);border-radius:12px;padding:6px 14px;box-shadow:0 1px 4px var(--sh)}ol.log li{border-top:1px solid var(--line);padding:6px 0}ol.log li:first-child{border-top:0}
+.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;background:var(--card);border-radius:14px;padding:10px 16px;box-shadow:0 2px 8px var(--sh)}.ctl .clk{margin-right:auto;font-size:14px;color:var(--mut)}.ctl .clk b{display:block;font-size:26px;line-height:1.1;color:var(--ink)}.chip.pri{background:#e5202e;border-color:#e5202e;color:#fff;font-weight:700}
+.pinb{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:3px 10px;font:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;vertical-align:middle;margin-left:6px}.pinb svg{width:14px;height:14px;fill:#e5202e;flex:none}.pinb:hover{border-color:var(--red)}
+.tri{list-style:none;margin:0;padding:0;display:grid;gap:8px}.tri li{background:var(--card);border-radius:12px;padding:10px 14px;box-shadow:0 1px 4px var(--sh);border-left:5px solid var(--c)}.tri small{display:block;color:var(--mut);font-size:13.5px;margin-top:2px}.tri .mv b{font-weight:800}.trq{margin-top:6px;font-size:14.5px}.nt{font-size:13.5px;color:var(--mut);margin-top:8px;border-left:3px solid #4aa8ff;padding-left:8px}
 .note{font-size:13.5px;color:var(--mut);margin-top:22px;max-width:70ch}
 &lt;/style&gt;
 &lt;/head&gt;
@@ -140,7 +158,8 @@ ol.log{list-style:none;margin:0;padding:0;font-size:14.5px;color:var(--mut);back
   &lt;p class=&quot;lede&quot;&gt;Every flagged household in one place. Responders assign teams, update each case and mark when someone has been reached. Households nobody has contacted stay highlighted until a person reaches them.&lt;/p&gt;
   &lt;/div&gt;&lt;/header&gt;
 &lt;div class=&quot;wrap&quot;&gt;
-  &lt;div class=&quot;tiles&quot; id=&quot;tiles&quot;&gt;&lt;/div&gt;&lt;div class=&quot;cov&quot; id=&quot;cov&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;tiles&quot; id=&quot;tiles&quot;&gt;&lt;/div&gt;&lt;div class=&quot;cov&quot; id=&quot;cov&quot;&gt;&lt;/div&gt;&lt;div class=&quot;ctl&quot; id=&quot;ctl&quot;&gt;&lt;/div&gt;
+  &lt;h2&gt;AI triage calls&lt;/h2&gt;&lt;ol class=&quot;tri&quot; id=&quot;tri&quot;&gt;&lt;/ol&gt;
   &lt;h2&gt;Show&lt;/h2&gt;&lt;div class=&quot;chips&quot; id=&quot;chips&quot;&gt;&lt;/div&gt;
   &lt;h2&gt;Team workload&lt;/h2&gt;&lt;div class=&quot;teams&quot; id=&quot;teams&quot;&gt;&lt;/div&gt;
   &lt;h2 id=&quot;count&quot;&gt;&lt;/h2&gt;
@@ -151,17 +170,50 @@ ol.log{list-style:none;margin:0;padding:0;font-size:14.5px;color:var(--mut);back
 &lt;script&gt;
 const mul=s=&gt;()=&gt;{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s&gt;&gt;&gt;15,1|s);t=t+Math.imul(t^t&gt;&gt;&gt;7,61|t)^t;return((t^t&gt;&gt;&gt;14)&gt;&gt;&gt;0)/4294967296};
 const TEAMS=[&#x27;Alpha&#x27;,&#x27;Bravo&#x27;,&#x27;Charlie&#x27;,&#x27;Delta&#x27;],STS=[&#x27;New&#x27;,&#x27;Assigned&#x27;,&#x27;En route&#x27;,&#x27;Resolved&#x27;],LV=[[&#x27;Elevated&#x27;,&#x27;#f0c030&#x27;],[&#x27;High&#x27;,&#x27;#f08030&#x27;],[&#x27;Critical&#x27;,&#x27;#e5202e&#x27;]];
-const FIL={all:[&#x27;All&#x27;,h=&gt;true],unc:[&#x27;Not contacted&#x27;,h=&gt;!h.contacted],una:[&#x27;No team yet&#x27;,h=&gt;!h.team],act:[&#x27;In progress&#x27;,h=&gt;h.team&amp;&amp;h.st!==&#x27;Resolved&#x27;],res:[&#x27;Resolved&#x27;,h=&gt;h.st===&#x27;Resolved&#x27;]};
-const r=mul(11),D=[];let f=&#x27;all&#x27;,L=[];
+const FIL={all:[&#x27;All&#x27;,h=&gt;true],unc:[&#x27;Not contacted&#x27;,h=&gt;!h.contacted],una:[&#x27;No team yet&#x27;,h=&gt;!h.team],act:[&#x27;In progress&#x27;,h=&gt;h.team&amp;&amp;h.st!==&#x27;Resolved&#x27;],res:[&#x27;Resolved&#x27;,h=&gt;h.st===&#x27;Resolved&#x27;],tri:[&#x27;From AI triage&#x27;,h=&gt;!!h.tri]};
+const r=mul(11),D=[];let f=&#x27;all&#x27;,L=[],HOUR=0,T=[];const PIN=&#x27;&lt;svg viewBox=&quot;0 0 24 24&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.500a2.500 2.500 0 0 1 0 5z&quot;/&gt;&lt;/svg&gt;&#x27;;const TL=[&#x27;Low&#x27;,&#x27;Elevated&#x27;,&#x27;High&#x27;,&#x27;Critical&#x27;],TC=[&#x27;#2fa36b&#x27;,&#x27;#f0c030&#x27;,&#x27;#f08030&#x27;,&#x27;#e5202e&#x27;];
+const esc=t=&gt;String(t).replace(/[&amp;&lt;&gt;&quot;]/g,c=&gt;({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;,&#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;,&#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;,&#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;}[c]));
+const pin=id=&gt;`&lt;button class=&quot;pinb&quot; data-g=&quot;${id}&quot; title=&quot;Show household ${id} on the 3D map&quot; aria-label=&quot;Show household ${id} on the 3D map&quot;&gt;${PIN}Map&lt;/button&gt;`;const CAP=4;
 for(let i=0;i&lt;36;i++){
   const a=r()&lt;.3,m=r()&lt;.2,nc=r()&lt;.25,lc=r()&lt;.4,dm=.3+.7*r();
   const score=Math.round(dm*55+(a?12:0)+(m?18:0)+(nc?7:0)+(lc?8:0));
   const contacted=r()&lt;.7-.15*(a+m+nc);
   const team=contacted&amp;&amp;r()&lt;.4?TEAMS[Math.floor(r()*4)]:null;
-  D.push({id:100+i,zone:&#x27;ABCD&#x27;[Math.floor(r()*4)],a,m,nc,lc,score,lv:score&gt;=55?2:score&gt;=40?1:0,contacted,team,st:team?&#x27;Assigned&#x27;:&#x27;New&#x27;});
+  D.push({id:100+i,zone:&#x27;ABCD&#x27;[Math.floor(r()*4)],a,m,nc,lc,score,lv:score&gt;=55?2:score&gt;=40?1:0,contacted,team,st:team?&#x27;Assigned&#x27;:&#x27;New&#x27;,eta:team?2:null});
 }
+const INIT=JSON.stringify(D);
 const get=id=&gt;D.find(h=&gt;h.id==id);
-function note(t){L.unshift(new Date().toLocaleTimeString([],{hour:&#x27;2-digit&#x27;,minute:&#x27;2-digit&#x27;})+&#x27; · &#x27;+t);L=L.slice(0,8)}
+const activeCnt=t=&gt;D.filter(h=&gt;h.team===t&amp;&amp;h.st!==&#x27;Resolved&#x27;).length;
+function autoAssign(){const q=D.filter(h=&gt;!h.team&amp;&amp;h.st!==&#x27;Resolved&#x27;).sort((a,b)=&gt;b.score-a.score);let n=0;for(const h of q){const t=TEAMS.map(t=&gt;[t,activeCnt(t)]).sort((a,b)=&gt;a[1]-b[1])[0];if(t[1]&gt;=CAP)break;h.team=t[0];h.st=&#x27;Assigned&#x27;;h.eta=HOUR+2;n++}
+  note(n?`Auto-assigned ${n} household${n&gt;1?&#x27;s&#x27;:&#x27;&#x27;} by urgency, most urgent first`:`Auto-assign: every team is at capacity (${CAP} active each) or nothing is waiting`);draw()}
+function skip(n){let en=0,rs=0;for(let k=0;k&lt;n/2;k++){HOUR+=2;D.forEach(h=&gt;{if(!h.team||h.st===&#x27;Resolved&#x27;||h.eta&gt;HOUR)return;if(h.st===&#x27;Assigned&#x27;){h.st=&#x27;En route&#x27;;h.contacted=true;h.eta=HOUR+6;en++}else if(h.st===&#x27;En route&#x27;){h.st=&#x27;Resolved&#x27;;h.contacted=true;h.eta=null;rs++}})}
+  note(`Skipped ${n} hours: ${en} household${en===1?&#x27;&#x27;:&#x27;s&#x27;} now en route, ${rs} resolved`);draw()}
+function note(t,id){L.unshift({t:&#x27;Hour &#x27;+HOUR+&#x27; · &#x27;+t,id});L=L.slice(0,12)}
+function applyEv(ev){
+  const lv=ev.to-1,h=get(ev.hid);
+  if(ev.to===0){const k=D.findIndex(x=&gt;x.id===ev.hid);if(k&gt;=0)D.splice(k,1);return}
+  const tri={id:ev.id,from:ev.from,to:ev.to,text:ev.text,reasons:ev.reasons};
+  if(h){h.score=ev.score;h.lv=lv;h.tri=tri;h.contacted=true}
+  else D.push({id:ev.hid,zone:&#x27;&#x27;,loc:ev.street,a:ev.fx.a,m:ev.fx.m,nc:ev.fx.nc,lc:ev.fx.lc,score:ev.score,lv,contacted:true,team:null,st:&#x27;New&#x27;,eta:null,tri,x:1})}
+function rebuild(keep){const old=Object.fromEntries(D.map(h=&gt;[h.id,h]));D.splice(0,D.length,...JSON.parse(INIT));T.slice().reverse().forEach(applyEv);
+  if(keep)D.forEach(h=&gt;{const o=old[h.id];if(o){h.team=o.team;h.st=o.st;h.contacted=o.contacted||h.contacted;h.eta=o.eta}});
+  MR.forEach(mapApply)}
+window.addEventListener(&#x27;message&#x27;,e=&gt;{const m=e.data;if(!m||m.qs!==1)return;
+  if(m.t===&#x27;mapstatus&#x27;){if(m.resolved){MR=MR.filter(x=&gt;x.hid!==m.hid);MR.push(m);mapApply(m);note(`Household ${m.hid} resolved on the 3D map`,m.hid)}
+    else{MR=MR.filter(x=&gt;x.hid!==m.hid);const h=get(m.hid);if(h){h.st=h.team?&#x27;Assigned&#x27;:&#x27;New&#x27;;h.eta=h.team?HOUR+2:null}note(`Household ${m.hid} reopened on the 3D map`,m.hid)}}
+  if(m.t===&#x27;triage&#x27;){const ev=m.ev;MR=MR.filter(x=&gt;x.hid!==ev.hid);T.unshift(ev);const old=get(ev.hid);const keep=old&amp;&amp;{team:old.team,st:old.st,eta:old.eta};applyEv(ev);
+    if(keep){const h=get(ev.hid);if(h){if(keep.st===&#x27;Resolved&#x27;){h.team=null;h.st=&#x27;New&#x27;;h.eta=null}else{h.team=keep.team;h.st=keep.st;h.eta=keep.eta}}}
+    note(`AI triage call: Household ${ev.hid} ${TL[ev.from]} → ${TL[ev.to]} (score ${ev.fromScore} → ${ev.score})`,ev.hid)}
+  if(m.t===&#x27;undo&#x27;){const k=T.findIndex(x=&gt;x.id===m.id);if(k&lt;0)return;const ev=T[k];T.splice(k,1);rebuild(true);note(`AI triage change for Household ${ev.hid} undone`,ev.hid)}
+  draw()});
+let MR=[];
+function mapApply(m){let h=get(m.hid);
+  if(!h){h={id:m.hid,zone:&#x27;&#x27;,loc:m.street,a:m.fx.a,m:m.fx.m,nc:m.fx.nc,lc:m.fx.lc,score:m.score,lv:Math.max(0,m.from-1),contacted:true,team:null,st:&#x27;New&#x27;,eta:null,x:1};D.push(h)}
+  h.st=&#x27;Resolved&#x27;;h.contacted=true;h.eta=null}
+let SENT=new Set();
+function sync(){const now=new Set(D.filter(h=&gt;h.st===&#x27;Resolved&#x27;).map(h=&gt;h.id));
+  now.forEach(id=&gt;{if(!SENT.has(id))parent.postMessage({qs:1,t:&#x27;status&#x27;,hid:id,resolved:true},&#x27;*&#x27;)});
+  SENT.forEach(id=&gt;{if(!now.has(id))parent.postMessage({qs:1,t:&#x27;status&#x27;,hid:id,resolved:false},&#x27;*&#x27;)});SENT=now}
 function draw(){
   const unc=D.filter(h=&gt;!h.contacted),crit=unc.filter(h=&gt;h.lv===2).length;
   const act=D.filter(FIL.act[1]).length,res=D.filter(FIL.res[1]).length,pct=Math.round((D.length-unc.length)/D.length*100);
@@ -171,28 +223,33 @@ function draw(){
     `&lt;div class=&quot;tile amb&quot;&gt;&lt;span&gt;In progress&lt;/span&gt;&lt;strong&gt;${act}&lt;/strong&gt;&lt;/div&gt;`+
     `&lt;div class=&quot;tile grn&quot;&gt;&lt;span&gt;Resolved&lt;/span&gt;&lt;strong&gt;${res}&lt;/strong&gt;&lt;/div&gt;`;
   document.getElementById(&#x27;cov&#x27;).innerHTML=`&lt;div class=&quot;covh&quot;&gt;&lt;b&gt;${pct}% of flagged households reached&lt;/b&gt;&lt;span&gt;${D.length-unc.length} of ${D.length}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;bar&quot;&gt;&lt;em style=&quot;width:${pct}%&quot;&gt;&lt;/em&gt;&lt;/div&gt;`;
+  document.getElementById(&#x27;ctl&#x27;).innerHTML=`&lt;div class=&quot;clk&quot;&gt;&lt;span&gt;Simulated time&lt;/span&gt;&lt;b&gt;Hour ${HOUR}&lt;/b&gt;&lt;/div&gt;&lt;button class=&quot;chip pri&quot; data-x=&quot;auto&quot;&gt;Auto-assign by urgency&lt;/button&gt;&lt;button class=&quot;chip pri&quot; data-x=&quot;skip&quot;&gt;Skip 6 hours&lt;/button&gt;&lt;button class=&quot;chip&quot; data-x=&quot;reset&quot;&gt;Reset&lt;/button&gt;`;
+  document.getElementById(&#x27;tri&#x27;).innerHTML=T.length?T.map(ev=&gt;`&lt;li style=&quot;--c:${TC[ev.to]}&quot;&gt;&lt;div class=&quot;mv&quot;&gt;&lt;b&gt;Household ${ev.hid}&lt;/b&gt; ${esc(ev.street||&#x27;&#x27;)} · ${TL[ev.from]} → &lt;b&gt;${TL[ev.to]}&lt;/b&gt; (score ${ev.fromScore} → ${ev.score})${pin(ev.hid)}&lt;/div&gt;&lt;div class=&quot;trq&quot;&gt;“${esc(ev.text.slice(0,160))}${ev.text.length&gt;160?&#x27;…&#x27;:&#x27;&#x27;}”&lt;/div&gt;&lt;small&gt;${ev.reasons.map(esc).join(&#x27; · &#x27;)}&lt;/small&gt;&lt;/li&gt;`).join(&#x27;&#x27;):&#x27;&lt;li style=&quot;--c:var(--line)&quot;&gt;No triage calls yet. Describe an emergency in the AI triage tab and it will appear here with a map pin.&lt;/li&gt;&#x27;;
   document.getElementById(&#x27;chips&#x27;).innerHTML=Object.keys(FIL).map(k=&gt;`&lt;button class=&quot;chip&quot; data-f=&quot;${k}&quot; aria-pressed=&quot;${k===f}&quot;&gt;${FIL[k][0]}&lt;/button&gt;`).join(&#x27;&#x27;);
   const cnt=t=&gt;D.filter(h=&gt;h.team===t&amp;&amp;h.st!==&#x27;Resolved&#x27;).length,mx=Math.max(1,...TEAMS.map(cnt));
-  document.getElementById(&#x27;teams&#x27;).innerHTML=TEAMS.map(t=&gt;`&lt;div class=&quot;tm&quot;&gt;&lt;b&gt;Team ${t}&lt;/b&gt;&lt;u&gt;&lt;em style=&quot;width:${cnt(t)/mx*100}%&quot;&gt;&lt;/em&gt;&lt;/u&gt;&lt;span&gt;${cnt(t)} active&lt;/span&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
+  document.getElementById(&#x27;teams&#x27;).innerHTML=TEAMS.map(t=&gt;`&lt;div class=&quot;tm&quot;&gt;&lt;b&gt;Team ${t}&lt;/b&gt;&lt;u&gt;&lt;em style=&quot;width:${cnt(t)/mx*100}%&quot;&gt;&lt;/em&gt;&lt;/u&gt;&lt;span&gt;${cnt(t)} of ${CAP} active&lt;/span&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
   const rows=D.filter(FIL[f][1]).sort((p,q)=&gt;q.score-p.score);
   document.getElementById(&#x27;count&#x27;).textContent=`${rows.length} household${rows.length===1?&#x27;&#x27;:&#x27;s&#x27;}, most urgent first`;
   document.getElementById(&#x27;list&#x27;).innerHTML=rows.map(h=&gt;{
     const fx=[h.a&amp;&amp;&#x27;Age 75+&#x27;,h.m&amp;&amp;&#x27;Medical equipment&#x27;,h.nc&amp;&amp;&#x27;No car&#x27;,h.lc&amp;&amp;&#x27;Thin cash cushion&#x27;].filter(Boolean).map(x=&gt;`&lt;span class=&quot;tag&quot;&gt;${x}&lt;/span&gt;`).join(&#x27;&#x27;);
     const k=h.lv,c=LV[k][1],si=STS.indexOf(h.st);
     return `&lt;li class=&quot;${!h.contacted&amp;&amp;k===2?&#x27;silent&#x27;:&#x27;&#x27;} ${k===0?&#x27;y&#x27;:&#x27;&#x27;}&quot; style=&quot;--c:${c}&quot;&gt;&lt;div class=&quot;sc&quot;&gt;&lt;strong&gt;${h.score}&lt;/strong&gt;&lt;small&gt;${LV[k][0]}&lt;/small&gt;&lt;/div&gt;
-    &lt;div&gt;&lt;div class=&quot;hd&quot;&gt;&lt;b&gt;Household ${h.id}&lt;/b&gt;&lt;span class=&quot;zn&quot;&gt;Zone ${h.zone}&lt;/span&gt;${h.contacted?&#x27;&lt;span class=&quot;tag ok&quot;&gt;Contacted&lt;/span&gt;&#x27;:&#x27;&lt;span class=&quot;tag bad&quot;&gt;Not contacted&lt;/span&gt;&#x27;}&lt;/div&gt;&lt;div&gt;${fx}&lt;/div&gt;
+    &lt;div&gt;&lt;div class=&quot;hd&quot;&gt;&lt;b&gt;Household ${h.id}&lt;/b&gt;&lt;span class=&quot;zn&quot;&gt;${h.loc||&#x27;Zone &#x27;+h.zone}&lt;/span&gt;${h.tri?pin(h.id):&#x27;&#x27;}${h.contacted?&#x27;&lt;span class=&quot;tag ok&quot;&gt;Contacted&lt;/span&gt;&#x27;:&#x27;&lt;span class=&quot;tag bad&quot;&gt;Not contacted&lt;/span&gt;&#x27;}&lt;/div&gt;&lt;div&gt;${fx}&lt;/div&gt;${h.tri?`&lt;div class=&quot;nt&quot;&gt;&lt;b&gt;AI triage:&lt;/b&gt; ${TL[h.tri.from]} → ${TL[h.tri.to]}. ${esc(h.tri.text.slice(0,140))}&lt;/div&gt;`:&#x27;&#x27;}
     &lt;ol class=&quot;step&quot;&gt;${STS.map((x,j)=&gt;`&lt;li class=&quot;${j&lt;si?&#x27;d&#x27;:j===si?&#x27;n&#x27;:&#x27;&#x27;}&quot;&gt;${x}&lt;/li&gt;`).join(&#x27;&#x27;)}&lt;/ol&gt;
     &lt;div class=&quot;act&quot;&gt;&lt;label&gt;Team&lt;select data-t=&quot;${h.id}&quot;&gt;&lt;option value=&quot;&quot;&gt;Unassigned&lt;/option&gt;${TEAMS.map(t=&gt;`&lt;option ${h.team===t?&#x27;selected&#x27;:&#x27;&#x27;}&gt;${t}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;/label&gt;
     &lt;label&gt;Status&lt;select data-s=&quot;${h.id}&quot; ${h.team?&#x27;&#x27;:&#x27;disabled&#x27;}&gt;${STS.map(x=&gt;`&lt;option ${h.st===x?&#x27;selected&#x27;:&#x27;&#x27;}&gt;${x}&lt;/option&gt;`).join(&#x27;&#x27;)}&lt;/select&gt;&lt;/label&gt;
     &lt;button class=&quot;chip&quot; data-c=&quot;${h.id}&quot;&gt;${h.contacted?&#x27;Mark not contacted&#x27;:&#x27;Mark contacted&#x27;}&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/li&gt;`}).join(&#x27;&#x27;)||&#x27;&lt;li&gt;No households match this view.&lt;/li&gt;&#x27;;
-  document.getElementById(&#x27;log&#x27;).innerHTML=L.length?L.map(x=&gt;`&lt;li&gt;${x}&lt;/li&gt;`).join(&#x27;&#x27;):&#x27;&lt;li&gt;No actions yet. Assign a team or update a case to start the log.&lt;/li&gt;&#x27;;
+  document.getElementById(&#x27;log&#x27;).innerHTML=L.length?L.map(x=&gt;`&lt;li&gt;${esc(x.t)}${x.id?pin(x.id):&#x27;&#x27;}&lt;/li&gt;`).join(&#x27;&#x27;):&#x27;&lt;li&gt;No actions yet. Assign a team or update a case to start the log.&lt;/li&gt;&#x27;;
+  sync();
 }
 document.addEventListener(&#x27;change&#x27;,e=&gt;{
   const d=e.target.dataset;if(!d.t&amp;&amp;!d.s)return;
-  if(d.t){const h=get(d.t);h.team=e.target.value||null;h.st=h.team?(h.st===&#x27;New&#x27;?&#x27;Assigned&#x27;:h.st):&#x27;New&#x27;;note(h.team?`Household ${h.id} assigned to Team ${h.team}`:`Household ${h.id} unassigned`)}
-  if(d.s){const h=get(d.s);h.st=e.target.value;if(h.st===&#x27;Resolved&#x27;)h.contacted=true;note(`Household ${h.id} marked ${h.st}`)}
+  if(d.t){const h=get(d.t);h.team=e.target.value||null;h.st=h.team?(h.st===&#x27;New&#x27;?&#x27;Assigned&#x27;:h.st):&#x27;New&#x27;;h.eta=h.team&amp;&amp;h.st!==&#x27;Resolved&#x27;?HOUR+(h.st===&#x27;En route&#x27;?6:2):null;note(h.team?`Household ${h.id} assigned to Team ${h.team}`:`Household ${h.id} unassigned`)}
+  if(d.s){const h=get(d.s);h.st=e.target.value;if(h.st===&#x27;Resolved&#x27;||h.st===&#x27;En route&#x27;)h.contacted=true;h.eta=h.st===&#x27;Resolved&#x27;?null:HOUR+(h.st===&#x27;En route&#x27;?6:2);note(`Household ${h.id} marked ${h.st}`)}
   draw()});
 document.addEventListener(&#x27;click&#x27;,e=&gt;{
+  const g=e.target.closest(&#x27;[data-g]&#x27;);if(g){parent.postMessage({qs:1,t:&#x27;goto&#x27;,hid:+g.dataset.g},&#x27;*&#x27;);return}
+  const x=e.target.closest(&#x27;[data-x]&#x27;);if(x){const a=x.dataset.x;if(a===&#x27;auto&#x27;)autoAssign();else if(a===&#x27;skip&#x27;)skip(6);else{HOUR=0;L=[];f=&#x27;all&#x27;;rebuild(false);draw()}return}
   const b=e.target.closest(&#x27;[data-f],[data-c]&#x27;);if(!b)return;
   if(b.dataset.f)f=b.dataset.f;
   else{const h=get(b.dataset.c);h.contacted=!h.contacted;note(`Household ${h.id} marked ${h.contacted?&#x27;contacted&#x27;:&#x27;not contacted&#x27;}`)}
@@ -201,84 +258,19 @@ draw();
 &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;
-"></iframe></section><section id="triage" aria-label="AI triage"><iframe title="AI triage" style="width:100%;height:100%;border:0;display:block" srcdoc="&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
-&lt;title&gt;Quiet Signal: AI triage of incoming messages&lt;/title&gt;
-&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;style&gt;
-:root{--bg:#f4f4f4;--ink:#1a1a1a;--card:#fff;--line:#d9d9d9;--mut:#5c5c5c;--red:#e5202e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=&quot;light&quot;]){--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}}
-:root[data-theme=&quot;dark&quot;]{--bg:#1b1b1b;--ink:#f2f2f2;--card:#262626;--line:#3d3d3d;--mut:#b0b0b0;--red:#ff5a66}
-*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 &quot;Source Sans 3&quot;,&quot;Helvetica Neue&quot;,Arial,sans-serif}
-.band{height:10px;background:#e5202e}
-.wrap{max-width:820px;margin:0 auto;padding:22px 16px 60px}
-h1{font-size:clamp(28px,5.5vw,48px);line-height:1.05;margin:8px 0 10px;font-weight:800;letter-spacing:-.03em;max-width:18ch}
-.lede{color:var(--mut);max-width:62ch;margin:0 0 18px}
-.badge{font-size:13px;border:1px solid var(--line);border-radius:99px;padding:2px 10px;color:var(--mut);background:var(--card)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
-.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 14px;font:inherit;font-size:15px;cursor:pointer}
-.chip[aria-pressed=true]{background:#e5202e;border-color:#e5202e;color:#fff}
-.chip:focus-visible,a:focus-visible{outline:3px solid var(--red);outline-offset:2px}
-#sum{color:var(--mut);font-size:15px;margin:0 0 12px}
-ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-li{background:var(--card);border:1px solid var(--line);border-left-width:8px;border-radius:12px;padding:14px 16px}
-.msg{font-size:18px;font-weight:600;margin:0 0 8px}
-.pill{display:inline-block;border-radius:6px;padding:1px 9px;font-weight:700;font-size:14px;color:#fff;margin-right:6px}
-.tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 9px;font-size:14px;color:var(--mut)}
-.why{margin:8px 0 0;font-size:15px}.why span{color:var(--mut)}
-.note{font-size:13.5px;color:var(--mut);margin-top:22px;max-width:70ch}
-a{color:var(--red);font-weight:600}
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div class=&quot;band&quot;&gt;&lt;/div&gt;
-&lt;div class=&quot;wrap&quot;&gt;
-  &lt;span class=&quot;badge&quot;&gt;16 synthetic messages · results pre-run through an LLM&lt;/span&gt;
-  &lt;h1&gt;Read every message. Rank by need, not by who wrote first.&lt;/h1&gt;
-  &lt;p class=&quot;lede&quot;&gt;After a disaster, thousands of texts, calls and claims arrive at once. An AI model reads each one, pulls out the need type and urgency, and explains its ranking in plain words. A person reviews the list and makes every decision.&lt;/p&gt;
-  &lt;div class=&quot;chips&quot; id=&quot;chips&quot;&gt;&lt;/div&gt;
-  &lt;p id=&quot;sum&quot;&gt;&lt;/p&gt;
-  &lt;ul id=&quot;list&quot;&gt;&lt;/ul&gt;
-  &lt;p class=&quot;note&quot;&gt;All messages are made up. Rankings were produced ahead of time by an LLM and checked by a person, so nothing here calls an AI live. The AI only suggests an order. It never changes coverage or claim decisions. Real use would need customer consent and local responder coordination.&lt;/p&gt;
-  
-&lt;/div&gt;
-&lt;script&gt;
-const LV={5:[&#x27;Critical&#x27;,&#x27;#e5202e&#x27;],4:[&#x27;Urgent&#x27;,&#x27;#f08030&#x27;],3:[&#x27;Soon&#x27;,&#x27;#f0c030&#x27;],2:[&#x27;Routine&#x27;,&#x27;#2fb67c&#x27;],1:[&#x27;Low&#x27;,&#x27;#6b7c8c&#x27;]};
-const M=[
-{m:&quot;My dad is on oxygen and our power has been out since last night. The tank is almost empty.&quot;,u:5,t:&quot;Medical equipment&quot;,r:&quot;Oxygen supply is running out and there is no power to refill it. Hours matter.&quot;},
-{m:&quot;Water is up to our porch and my grandmother can’t walk. We’re on the second floor.&quot;,u:5,t:&quot;Evacuation&quot;,r:&quot;Rising water plus a person who cannot move on their own.&quot;},
-{m:&quot;I need my insulin out of the fridge, but there’s been no power for two days and it’s getting warm.&quot;,u:5,t:&quot;Medical supplies&quot;,r:&quot;Insulin spoils without cold storage, and a missed dose is dangerous.&quot;},
-{m:&quot;There’s a strong gas smell on our street and now inside our house.&quot;,u:5,t:&quot;Safety hazard&quot;,r:&quot;Possible gas leak. Risk of fire or poisoning, and it affects neighbors too.&quot;},
-{m:&quot;No cell service at my mom’s and I haven’t heard from her since the fire. She uses a wheelchair.&quot;,u:5,t:&quot;Welfare check&quot;,r:&quot;Silent, mobility-limited and in the fire zone. Silence here is a warning sign.&quot;},
-{m:&quot;The house is gone. We have nowhere to sleep tonight and three kids.&quot;,u:4,t:&quot;Shelter&quot;,r:&quot;Safe now but with no shelter tonight. Children are involved.&quot;},
-{m:&quot;I live alone, I’m 82, I have had no heat since the storm and I can’t drive.&quot;,u:4,t:&quot;Welfare check&quot;,r:&quot;Older, isolated and cold with no transport. Likely to get worse each day.&quot;},
-{m:&quot;I’m out of my heart medication and the pharmacy is closed because of the flooding.&quot;,u:4,t:&quot;Medical supplies&quot;,r:&quot;A missed heart medication is risky within a day or two.&quot;},
-{m:&quot;Hello, I don’t speak much English. No one has come to our building and we have no power.&quot;,u:3,t:&quot;Outreach gap&quot;,r:&quot;Possibly overlooked because of language. Needs a translator and a visit, not just a text.&quot;},
-{m:&quot;Trees fell across the road. We can’t get out, but nobody is hurt.&quot;,u:3,t:&quot;Road access&quot;,r:&quot;No injuries, but they are stuck. Becomes urgent if supplies run short.&quot;},
-{m:&quot;The roof is torn off and rain is pouring in, but we’re all okay at my sister’s house.&quot;,u:2,t:&quot;Property damage&quot;,r:&quot;Safe place to stay. The damage is real but can wait for an adjuster visit.&quot;},
-{m:&quot;We have no water, but we’re okay. Our neighbors are sharing.&quot;,u:2,t:&quot;Supplies&quot;,r:&quot;Basic need is being met for now. Flag for a water drop later.&quot;},
-{m:&quot;The basement flooded and we lost a lot of stuff. I’m really upset.&quot;,u:2,t:&quot;Property damage&quot;,r:&quot;Emotional distress, but no safety risk. Offer a friendly callback.&quot;},
-{m:&quot;My rental car is needed because mine was flooded. Just by next week is fine.&quot;,u:2,t:&quot;Claim question&quot;,r:&quot;Not time-critical. Can follow the normal claim process.&quot;},
-{m:&quot;The fence blew down. Can I file a claim online?&quot;,u:1,t:&quot;Claim question&quot;,r:&quot;Minor damage and a simple question. A self-service link is enough.&quot;},
-{m:&quot;Hail dented my car and cracked the windshield.&quot;,u:1,t:&quot;Vehicle claim&quot;,r:&quot;Vehicle damage only, with no risk to anyone’s safety.&quot;}
-];
-let f=0;
-function draw(){
-  const rows=M.filter(x=&gt;!f||x.u===f).sort((a,b)=&gt;b.u-a.u);
-  document.getElementById(&#x27;chips&#x27;).innerHTML=[0,5,4,3,2,1].map(n=&gt;`&lt;button class=&quot;chip&quot; data-f=&quot;${n}&quot; aria-pressed=&quot;${n===f}&quot;&gt;${n?n+&#x27; &#x27;+LV[n][0]:&#x27;All&#x27;}&lt;/button&gt;`).join(&#x27;&#x27;);
-  document.getElementById(&#x27;sum&#x27;).textContent=`Showing ${rows.length} of ${M.length} messages, most urgent first.`;
-  document.getElementById(&#x27;list&#x27;).innerHTML=rows.map(x=&gt;`&lt;li style=&quot;border-left-color:${LV[x.u][1]}&quot;&gt;&lt;p class=&quot;msg&quot;&gt;“${x.m}”&lt;/p&gt;&lt;span class=&quot;pill&quot; style=&quot;background:${LV[x.u][1]};${x.u===3?&#x27;color:#1a1a1a&#x27;:&#x27;&#x27;}&quot;&gt;${x.u} · ${LV[x.u][0]}&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;${x.t}&lt;/span&gt;&lt;p class=&quot;why&quot;&gt;&lt;span&gt;Why the AI ranked it here:&lt;/span&gt; ${x.r}&lt;/p&gt;&lt;/li&gt;`).join(&#x27;&#x27;);
-}
-document.addEventListener(&#x27;click&#x27;,e=&gt;{const b=e.target.closest(&#x27;[data-f]&#x27;);if(b){f=+b.dataset.f;draw()}});
-draw();
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-"></iframe></section>
+"></iframe></section><section id="triage" aria-label="AI triage"><div class="tr">
+<h2>AI triage</h2>
+<p class="trl">Pick a household, describe what is happening in plain words, and the assistant re-scores its risk. The new level shows on the 3D map and the responder dashboard right away.</p>
+<label for="trh">Household</label><select id="trh"></select>
+<div id="trinfo" class="trinfo"></div>
+<label for="trt">What is happening?</label>
+<textarea id="trt" rows="5" placeholder="Example: Water is coming into the living room and my husband uses an oxygen machine. Power just went out."></textarea>
+<div class="trex" id="trex"></div>
+<button id="trgo" class="trgo" type="button">Analyze and reclassify</button>
+<div id="trout" aria-live="polite"></div>
+<h3>Recent triage calls</h3><ol id="trhist" class="trhist"></ol>
+<p class="trnote">This demo analyzes the text with keyword rules, so it runs on a static site with no server. In production the same step would call a language model. Risk ranking only changes who is helped first, never coverage or claim decisions.</p>
+</div></section>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* Meridian (The Colony, TX) shape traced from an OpenStreetMap image: h=houses [x,y,w,h,street], r=road rects, d=center-line dots, in image pixels. (c) OpenStreetMap contributors */
@@ -319,6 +311,8 @@ const ring=new THREE.Mesh(new THREE.RingGeometry(1.5,1.9,40),new THREE.MeshBasic
   mk(MAP.c.map(r=>[(r[0]-OX)*K,(r[1]-OY)*K,(r[0]+r[2]-OX)*K,(r[1]+r[3]-OY)*K]),0x4aa3e8,-.03);
   scene.add(rg);
 })();
+function addBeacon(i,px,pz){const bm=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:.3,depthWrite:false}),beam=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,3.2,8),bm);beam.position.set(px,3.4,pz);world.add(beam);
+  const rings=[0,.5].map(o=>{const m=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}),rg=new THREE.Mesh(new THREE.RingGeometry(.85,1,32),m);rg.rotation.x=-Math.PI/2;rg.position.set(px,2.9,pz);world.add(rg);return{rg,m,o}});beacons.push({i,beam,rings})}
 function build(){
   if(world)scene.remove(world);world=new THREE.Group();scene.add(world);
   const sc=SCN[S.sc],r=mul(sc.s),r2=mul(sc.s*31+5);H=[];meshes=[];beacons=[];
@@ -333,8 +327,7 @@ function build(){
     const mat=new THREE.MeshLambertMaterial({transparent:true}),g=new THREE.Group();
     const b=new THREE.Mesh(new THREE.BoxGeometry(1.16,1.2,1.16),mat),ro=new THREE.Mesh(new THREE.ConeGeometry(.98,.9,4),mat);
     b.position.y=.6;ro.position.y=1.65;ro.rotation.y=Math.PI/4;g.add(b,ro);g.position.set(px,0,pz);world.add(g);
-    if(lv===3){const bm=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:.3,depthWrite:false}),beam=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,3.2,8),bm);beam.position.set(px,3.4,pz);world.add(beam);
-      const rings=[0,.5].map(o=>{const m=new THREE.MeshBasicMaterial({color:0xff4d5a,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}),rg=new THREE.Mesh(new THREE.RingGeometry(.85,1,32),m);rg.rotation.x=-Math.PI/2;rg.position.set(px,2.9,pz);world.add(rg);return{rg,m,o}});beacons.push({i,beam,rings})}
+    if(lv===3)addBeacon(i,px,pz);
     b.userData.i=ro.userData.i=i;meshes.push(b,ro);
     H.push({i,x,y,st,px,pz,dm,age,a,m,nc,lc,ls,mob,lep,kid,ui,score,lv,l0:lv,helps:0,done:[],g,mat});
   });
@@ -344,7 +337,7 @@ const match=h=>[...S.on].every(k=>FILT.find(f=>f[0]===k)[2](h));
 function recolor(){
   const cnt=[0,0,0,0];let n=0;
   H.forEach(h=>{const ok=match(h);h.ok=ok;if(ok){cnt[h.lv]++;n++}h.mat.color.setHex(ok?LV[h.lv]:0x39434f);h.mat.opacity=ok?1:.3;h.g.scale.y=ok?LH[h.lv]:.8});
-  ui(cnt,n);
+  ui(cnt,n);if(window.triageFill)triageFill();
 }
 const why=h=>[`Age ${h.age}${h.a?' (65+)':''}`,h.m&&'Depends on medical equipment',h.nc&&'No car, so can’t evacuate',h.lc&&'Thin cash cushion',h.ls&&'Lives alone',h.mob&&'Limited mobility',h.lep&&'Limited English, may need a translator',h.kid&&'Young children in the home',h.ui&&'Underinsured, may face out-of-pocket costs',`${SCN[S.sc].imp}: ${h.dm>=.7?'severe':h.dm>=.5?'major':h.dm>=.25?'moderate':'minor'} (estimated)`].filter(Boolean);
 function ui(cnt,n){
@@ -362,7 +355,7 @@ function card(h){
   const c=document.getElementById('card');if(!h){c.style.display='none';return}
   const dl=(h.dm>=.7?'Severe':h.dm>=.5?'Major':h.dm>=.25?'Moderate':'Minor')+' '+SCN[S.sc].imp.toLowerCase();
   const tags=[`<span class="tag ${h.a?'r':''}">Age ${h.age}</span>`,h.nc&&'<span class="tag r">No car</span>',h.lc&&'<span class="tag r">Thin cash cushion</span>',h.m&&'<span class="tag r">Medical equipment</span>',h.mob&&'<span class="tag r">Limited mobility</span>',h.ls&&'<span class="tag r">Lives alone</span>',h.lep&&'<span class="tag r">Limited English</span>',h.kid&&'<span class="tag r">Young children</span>',h.ui&&'<span class="tag r">Underinsured</span>',`<span class="tag ${h.dm>=.5?'r':''}">${dl}</span>`].filter(Boolean).join('');
-  c.innerHTML=`<button data-x aria-label="Close">×</button><b>Household ${100+h.i}</b><br><span class="pill" style="background:${LC[h.lv]};${h.lv===1?'color:#1a1a1a':''}">${LN[h.lv]} risk · score ${h.score}</span><div class="tags">${tags}</div><small>Red tags are the risk factors. Suggested: ${ACT[h.lv]}</small>${choices(h)}`;
+  c.innerHTML=`<button data-x aria-label="Close">×</button><b>Household ${100+h.i}</b><br><span class="pill" style="background:${LC[h.lv]};${h.lv===1?'color:#1a1a1a':''}">${LN[h.lv]} risk · score ${h.score}</span><div class="tags">${tags}</div><small>Red tags are the risk factors. Suggested: ${ACT[h.lv]}</small>${h.res?'<div class="trn"><small><b>Responders:</b> case resolved, risk lowered to Low</small></div>':''}${h.tri?`<div class="trn"><small><b>AI triage:</b> ${h.tri.replace(/</g,'&lt;')}</small></div>`:''}${choices(h)}`;
   c.style.display='block';
 }
 function select(i){S.sel=i;const h=H[i];ring.visible=true;ring.position.x=h.px;ring.position.z=h.pz;goal.set(h.px,0,h.pz);GT.x=h.px;GT.z=h.pz;rad=Math.min(rad,30);ui(H.reduce((c,x)=>(x.ok&&c[x.lv]++,c),[0,0,0,0]),H.filter(x=>x.ok).length)}
@@ -407,7 +400,7 @@ function renderDash(){if(!document.getElementById('dk'))return;
     return `<tr><td><b>${100+h.i}</b>${h.silent?'<small>No contact</small>':''}</td><td><span class="pill" style="background:${LC[h.lv]}">${LN[h.lv]} ${h.score}</span></td><td>${tags(h)}</td><td><span class="dot" style="background:${sc[1]}"></span>${st.s==='active'?RT[st.t].n+', due hour '+st.due:sc[0]}</td><td>${can?btn('adj','Adjuster')+btn('drone','Drone')+btn('call','Call'):''}<button class="ab" data-m="${h.i}">Map</button></td></tr>`}).join('')||'<tr><td colspan="5">Every urgent household has been helped.</td></tr>');
   document.getElementById('dl').innerHTML=DS.log.map(t=>`<li>${t}</li>`).join('')||'<li>No activity yet. Assign a resource or press Auto-assign.</li>';
 }
-function setTab(t){document.body.classList.toggle('dash',t==='dash');document.body.classList.toggle('triage',t==='triage');document.getElementById('tab-triage').setAttribute('aria-selected',t==='triage');document.getElementById('tab-map').setAttribute('aria-selected',t==='map');document.getElementById('tab-dash').setAttribute('aria-selected',t==='dash');}
+function setTab(t){document.body.classList.toggle('dash',t==='dash');document.body.classList.toggle('triage',t==='triage');document.getElementById('tab-triage').setAttribute('aria-selected',t==='triage');document.getElementById('tab-map').setAttribute('aria-selected',t==='map');document.getElementById('tab-dash').setAttribute('aria-selected',t==='dash');if(t==='triage'&&S.sel!=null&&window.triageFill){const e=document.getElementById('trh');if(e){e.value=S.sel;triageInfo()}}}
 document.addEventListener('click',e=>{
   const T=e.target.closest('[data-tab]');if(T){setTab(T.dataset.tab);return}
   const D2=e.target.closest('[data-d]');if(D2){if(!DS)dashReset();const d=D2.dataset.d;if(d==='adv')advance(6);if(d==='auto')autoAssign();if(d==='reset')dashReset();renderDash();return}
@@ -421,10 +414,16 @@ function choices(h){
   if(h.lv===0)t+='<small>Low risk now. No further action needed.</small>';
   else t+='<small>Each step you take lowers this household by one level.</small>';
   t+=Object.keys(STEPS).map(k=>{const d=h.done.includes(k);return `<button class="cb" data-ca="${k}:${h.i}" ${d||h.lv===0?'disabled':''}>${STEPS[k]}${d?' ✓':''}</button>`}).join('');
+  t+=h.res?`<button class="cb" data-res="${h.i}">Reopen case</button>`:h.lv>0?`<button class="cb" data-res="${h.i}">Mark resolved</button>`:'';
   return t+'</div>'}
 document.addEventListener('click',e=>{const C=e.target.closest('[data-ca]');if(!C)return;const[a,x]=C.dataset.ca.split(':'),i=+x,h=H[i];
   if(!h||!STEPS[a]||h.done.includes(a)||h.lv===0)return;
-  h.done.push(a);h.helps++;h.lv--;h.score=Math.min(h.score,[24,39,54][h.lv]);recolor()});
+  h.done.push(a);h.helps++;h.lv--;h.score=Math.min(h.score,[24,39,54][h.lv]);
+  if(h.lv===0&&!h.res){h.res=1;h.pre={score:25,lv:1};toDash({t:'mapstatus',hid:100+h.i,resolved:true,from:Math.max(1,h.l0),score:25,street:MAP.s[h.st]||'',fx:{a:!!h.a,m:!!h.m,nc:!!h.nc,lc:!!h.lc}})}
+  recolor()});
+document.addEventListener('click',e=>{const R=e.target.closest('[data-res]');if(!R)return;const h=H[+R.dataset.res];if(!h)return;
+  if(h.res){h.res=0;if(h.pre){h.score=h.pre.score;h.lv=h.pre.lv}h.pre=null;if(h.lv===3&&!beacons.some(b=>b.i===h.i))addBeacon(h.i,h.px,h.pz);recolor();toDash({t:'mapstatus',hid:100+h.i,resolved:false})}
+  else if(h.lv>0){const o={score:h.score,lv:h.lv};h.pre=o;h.res=1;h.lv=0;h.score=Math.min(h.score,24);recolor();toDash({t:'mapstatus',hid:100+h.i,resolved:true,from:o.lv,score:o.score,street:MAP.s[h.st]||'',fx:{a:!!h.a,m:!!h.m,nc:!!h.nc,lc:!!h.lc}})}});
 function animBeacons(){const t=Date.now()/1000,still=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
   beacons.forEach(b=>{const on=!!(H[b.i]&&H[b.i].ok&&H[b.i].lv===3);b.beam.visible=on;b.rings.forEach(r=>{r.rg.visible=on;const ph=still?.3:((t/1.8+r.o)%1);r.rg.scale.setScalar(.7+ph*1.8);r.m.opacity=still?.35:.55*(1-ph)})})}
 let cv2=null,dnSoft=null,mvSoft=0,SF=[];const GT={x:0,z:0,cx:0,cz:0};
@@ -479,7 +478,92 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b
   if(v==='reset'){th=.6;ph=1.0;rad=100;goal.set(0,0,0);GT.x=0;GT.z=0;S.sel=null;ring.visible=false;recolor()}
   if(v==='top'){ph=.25;rad=95;goal.set(0,0,0);GT.x=0;GT.z=0}});
 document.addEventListener('change',e=>{if(e.target.name==='sc'){S.sc=e.target.value;build();dashReset()}});
-build();
+/* ---------- AI triage ---------- */
+const TN=['Low','Elevated','High','Critical'],TCOL=['#2fa36b','#f0c030','#f08030','#e5202e'],TRI=[];let triSeq=0;
+const SIG=[
+ ['life','Life-threatening emergency',30,/trapped|unconscious|not breathing|can.?t breathe|cannot breathe|chest pain|heart attack|stroke|collaps|bleeding|drown|on fire|fire inside|smoke inside|fell and|can.?t wake/i],
+ ['water','Water entering the home',16,/water (is )?(coming|rising|in the|inside)|flooded|flooding|knee.?deep|waist.?deep|rising water|water in (the )?(house|home|living|kitchen|garage)|creek (is )?(over|up)/i],
+ ['hazard','Gas, electrical or structural hazard',16,/gas (smell|leak)|smell gas|power ?line|downed line|sparks|sparking|roof (is )?(gone|caved|collapsed|torn)|tree (fell|came|is) (on|through)|walls? (cracked|collaps)|foundation|ceiling (fell|collaps)/i],
+ ['power','Power or utilities out',9,/no power|power (is |went |just )?out|power outage|lost power|no electricity|no heat|no (a\.?c|air conditioning)|no running water|no water pressure/i],
+ ['medical','Medical equipment or medication at risk',12,/oxygen|ventilator|dialysis|insulin|cpap|nebulizer|oxygen concentrator|medication|medicine|prescription|oxygen machine/i],
+ ['trapped','Cannot leave or reach help',10,/stuck|cannot leave|can.?t leave|can.?t get out|no way out|road (is )?(blocked|closed|flooded)|wheelchair|can.?t walk|cannot walk|can.?t drive|no car|no ride/i],
+ ['people','Children or older adults at home',6,/baby|infant|newborn|toddler|kids?|children|elderly|grandm|grandp|mother|father|disabled|pregnan/i],
+ ['alone','Alone or cannot reach anyone',6,/alone|by myself|no one (is )?(here|coming|answer|home)|nobody (is )?(here|coming|answer|home)|no signal|no (cell )?service|phone (is )?dead|can.?t reach/i],
+ ['needs','Food, water, shelter or money need',7,/no food|out of food|no drinking water|no water to drink|nowhere to (go|stay)|displaced|can.?t afford|no money|need (a )?hotel|need shelter|homeless/i],
+ ['damage','Property damage reported',8,/damage|damaged|broken|shattered|windows? (broke|smash|blown)|hail|leak|leaking|mold/i],
+ ['safe','Reports being safe',-14,/\b(we are|we.?re|i am|i.?m|all|everyone is) (safe|fine|okay|ok|good)\b|no damage|dry now|all good|no problem|evacuated|staying with|at a (hotel|shelter)|left the (house|home|area)/i],
+ ['resolved','Problem resolved',-16,/help arrived|rescued|power (is )?(back|restored)|water (has )?(receded|gone|drained)|resolved|fixed now|they came|crew (came|arrived)/i]
+];
+const VULN=h=>[h.a,h.m,h.mob,h.nc,h.lc,h.ls,h.lep,h.kid,h.ui].filter(Boolean).length;
+const lvOf=sc=>sc>=55?3:sc>=40?2:sc>=25?1:0;
+function triageAnalyze(h,text){
+  const t=text.trim(),hits=[];
+  SIG.forEach(([k,lab,w,re])=>{const m=t.match(re);if(m)hits.push({k,lab,w,m:m[0].trim()})});
+  if(hits.find(x=>x.k==='safe')&&hits.find(x=>x.w>0&&x.k!=='people')&&/\bnot (safe|ok|okay|fine)\b|\bisn.?t safe\b/i.test(t))hits.splice(hits.findIndex(x=>x.k==='safe'),1);
+  if(/no damage|nothing (is )?damaged|not damaged/i.test(t)){const k=hits.findIndex(x=>x.k==='damage');if(k>=0)hits.splice(k,1)}
+  if(hits.some(x=>x.w<0)&&!hits.some(x=>x.w>=9))for(let k=hits.length-1;k>=0;k--)if(hits[k].w>0)hits.splice(k,1);
+  const amp=1+Math.min(.4,.1*VULN(h)),pos=hits.filter(x=>x.w>0),neg=hits.filter(x=>x.w<0);
+  let d=pos.reduce((a,x)=>a+x.w,0)*amp+neg.reduce((a,x)=>a+x.w,0);
+  if(pos.length&&neg.length)d=Math.max(d,0)*.6;
+  d=Math.round(d);
+  let ns=Math.max(0,Math.min(100,h.score+d));
+  if(hits.find(x=>x.k==='life'))ns=Math.max(ns,60);
+  if(hits.find(x=>x.k==='medical')&&hits.find(x=>x.k==='power')&&h.m)ns=Math.max(ns,56);
+  if(neg.length&&!pos.length&&ns>=25)ns=Math.min(ns,[24,39,54][Math.max(0,lvOf(ns)-1)]);
+  return{hits,delta:ns-h.score,score:ns,lv:lvOf(ns),amp}}
+function triageInfo(){
+  const e=document.getElementById('trh'),h=H[+e.value],o=document.getElementById('trinfo');if(!h||!o)return;
+  const tg=[['Age '+h.age,h.a],['No car',h.nc],['Thin cash',h.lc],['Medical equipment',h.m],['Limited mobility',h.mob],['Lives alone',h.ls],['Limited English',h.lep],['Young children',h.kid],['Underinsured',h.ui]].filter(x=>x[0].startsWith('Age')||x[1]).map(x=>`<span class="tg ${x[1]?'r':''}">${x[0]}</span>`).join('');
+  o.innerHTML=`<span class="lvp" style="background:${TCOL[h.lv]};${h.lv===1?'color:#1a1a1a':''}">${TN[h.lv]} · score ${h.score}</span> <span>${MAP.s[h.st]||''}</span><div>${tg}</div>`}
+function triageFill(){
+  const e=document.getElementById('trh');if(!e||!H.length)return;const cur=e.value||(S.sel!=null?S.sel:'');
+  e.innerHTML=H.map(h=>`<option value="${h.i}">Household ${100+h.i} · ${MAP.s[h.st]||''} · ${TN[h.lv]} (${h.score})</option>`).join('');
+  e.value=cur!==''?cur:H[0].i;triageInfo();triageHist()}
+const PIN='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.700 7-13c0-3.900-3.100-7-7-7zm0 9.500A2.500 2.500 0 1 1 12 6.500a2.500 2.500 0 0 1 0 5z"/></svg>';
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function triageHist(){const o=document.getElementById('trhist');if(!o)return;
+  o.innerHTML=TRI.length?TRI.slice().reverse().map(ev=>`<li><span><b>Household ${100+ev.i}</b> · ${TN[ev.from]} → ${TN[ev.to]} (${ev.fromScore} → ${ev.score})<small>${esc(ev.text.slice(0,110))}${ev.text.length>110?'…':''}</small></span><button class="pinb" data-goto="${ev.i}" title="Show on 3D map">${PIN}Map</button></li>`).join(''):'<li>No triage calls yet. Choose a household and describe what is happening.</li>'}
+function toDash(msg){const f=document.querySelector('#dash iframe');try{f&&f.contentWindow&&f.contentWindow.postMessage(Object.assign({qs:1},msg),'*')}catch(_){}}
+function gotoHouse(i){const h=H[i];if(!h)return;setTab('map');select(i);card(h);recolor()}
+function triageRun(){
+  const e=document.getElementById('trh'),h=H[+e.value],tx=document.getElementById('trt').value,out=document.getElementById('trout');
+  if(!h)return;
+  if(tx.trim().length<8){out.innerHTML='<div class="trres">Write a sentence or two about what is happening first.</div>';return}
+  const r=triageAnalyze(h,tx);
+  if(!r.hits.length){out.innerHTML=`<div class="trres"><b>No clear risk signals found.</b> Household ${100+h.i} stays ${TN[h.lv]} (score ${h.score}). Add detail such as water, power, medical needs, injuries or who is at home.</div>`;return}
+  const ev={id:++triSeq,i:h.i,hid:100+h.i,from:h.lv,to:r.lv,fromScore:h.score,score:r.score,text:tx.trim(),
+    reasons:r.hits.map(x=>`${x.lab} ("${x.m}") ${x.w>0?'+':''}${Math.round(x.w*(x.w>0?r.amp:1))}`),prev:{score:h.score,lv:h.lv,tri:h.tri||''},street:MAP.s[h.st]||'',
+    fx:{a:!!h.a,m:!!h.m,nc:!!h.nc,lc:!!h.lc}};
+  h.res=0;h.pre=null;
+  h.score=r.score;h.lv=r.lv;h.tri=`${TN[ev.from]} → ${TN[ev.to]}: ${tx.trim().slice(0,90)}`;
+  if(h.lv===3&&!h.bc){h.bc=1;if(!beacons.some(b=>b.i===h.i))addBeacon(h.i,h.px,h.pz)}
+  TRI.push(ev);recolor();select(h.i);
+  toDash({t:'triage',ev:{id:ev.id,hid:ev.hid,from:ev.from,to:ev.to,fromScore:ev.fromScore,score:ev.score,text:ev.text,reasons:ev.reasons,street:ev.street,fx:ev.fx}});
+  const dir=ev.to>ev.from?'raised':ev.to<ev.from?'lowered':'kept the same';
+  out.innerHTML=`<div class="trres"><div class="mv"><span>Household ${ev.hid}</span><span class="lvp" style="background:${TCOL[ev.from]};${ev.from===1?'color:#1a1a1a':''}">${TN[ev.from]}</span>→<span class="lvp" style="background:${TCOL[ev.to]};${ev.to===1?'color:#1a1a1a':''}">${TN[ev.to]}</span><span style="font-weight:600;font-size:15px">score ${ev.fromScore} → ${ev.score}</span></div>
+  <div class="rec">Triage ${dir} the risk level. <b>Suggested:</b> ${ACT[ev.to]}</div><ul>${ev.reasons.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  <div class="row"><button class="pinb" data-goto="${h.i}">${PIN}View on 3D map</button><button data-tdash="1" class="pinb">Open responder dashboard</button><button data-tundo="${ev.id}" class="pinb">Undo</button></div></div>`;
+  document.getElementById('trt').value=''}
+function triageUndo(id){const k=TRI.findIndex(x=>x.id===id);if(k<0)return;const ev=TRI[k],h=H[ev.i];
+  const later=TRI.slice(k+1).some(x=>x.i===ev.i);if(!later){h.score=ev.prev.score;h.lv=ev.prev.lv;h.tri=ev.prev.tri||undefined}
+  TRI.splice(k,1);recolor();toDash({t:'undo',id});document.getElementById('trout').innerHTML='<div class="trres">Triage change undone.</div>'}
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-goto]');if(g){gotoHouse(+g.dataset.goto);return}
+  if(e.target.closest('[data-tdash]')){setTab('dash');return}
+  const u=e.target.closest('[data-tundo]');if(u){triageUndo(+u.dataset.tundo);return}
+  const x=e.target.closest('[data-ex]');if(x){document.getElementById('trt').value=EX[+x.dataset.ex];return}
+  if(e.target.closest('#trgo'))triageRun()});
+document.addEventListener('change',e=>{if(e.target.id==='trh')triageInfo()});
+window.addEventListener('message',e=>{const d=e.data;if(!d||d.qs!==1)return;const f=document.querySelector('#dash iframe');if(!f||e.source!==f.contentWindow)return;const i=(+d.hid)-100;
+  if(d.t==='status'){const h=H[i];if(!h)return;
+    if(d.resolved&&!h.res){h.pre={score:h.score,lv:h.lv};h.res=1;h.lv=0;h.score=Math.min(h.score,24);recolor()}
+    else if(!d.resolved&&h.res){h.res=0;if(h.pre){h.score=h.pre.score;h.lv=h.pre.lv}h.pre=null;if(h.lv===3&&!beacons.some(b=>b.i===h.i))addBeacon(h.i,h.px,h.pz);recolor()}
+    return}
+  if(d.t!=='goto')return;if(i>=0&&i<H.length)gotoHouse(i)});
+const EX=['Water is coming into our living room and my husband uses an oxygen machine. The power just went out.','A tree fell on the roof and I smell gas. I am here alone and cannot leave.','We are safe now. We evacuated to a hotel and the water receded, no damage.','Hail broke two windows but nobody is hurt. We have power and are fine.'];
+(function(){const o=document.getElementById('trex');if(o)o.innerHTML=['Flooding + oxygen','Gas smell, alone','Safe, evacuated','Minor hail damage'].map((l,i)=>`<button type="button" data-ex="${i}">${l}</button>`).join('')})();
+
+build();triageFill();
 if(!renderer)init2d();(function loop(){requestAnimationFrame(loop);if(!renderer){soft();return}if(spin&&!down)th+=.0025;cam();animBeacons();ring.scale.setScalar(1+.12*Math.sin(Date.now()/250));renderer.render(scene,camera)})();
 </script>
 </body>

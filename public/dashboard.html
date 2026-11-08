@@ -68,6 +68,16 @@ ol.log{list-style:none;margin:0;padding:0;font-size:14.5px;color:var(--mut);back
   <ul class="cases" id="list"></ul>
   <h2>Activity log</h2><ol class="log" id="log"></ol>
   <p class="note">Synthetic data. Risk ranking only changes who is helped first. It never changes coverage or claim decisions, and people make every assignment and status change. Changes are saved to the shared database.</p>
+ <section id="resident-requests">
+  <h2>Incoming Assistance Requests</h2>
+  <p class="note">
+    Requests submitted by residents.
+    Review each case before assigning a response team.
+  </p>
+  <div id="requestList" aria-live="polite">
+    Loading assistance requests...
+  </div>
+</section> 
 </div>
 <script>
 const TEAMS=['Alpha','Bravo','Charlie','Delta'],STS=['New','Assigned','En route','Resolved'];
@@ -105,6 +115,140 @@ function draw(){
 document.addEventListener('change',e=>{const d=e.target.dataset;if(d.t)save(d.t,{team:e.target.value||null});if(d.s)save(d.s,{status:e.target.value})});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-f],[data-c]');if(!b)return;if(b.dataset.f){f=b.dataset.f;draw()}else{const h=D.find(x=>x.id==b.dataset.c);if(h)save(h.id,{contacted:!h.contacted})}});
 load();setInterval(()=>{if(document.activeElement?.tagName!=='SELECT')load()},5000);
+</script>
+  
+<script>
+/* Resident assistance requests */
+
+const requestList = document.getElementById('requestList');
+
+// Safely display text submitted by residents.
+function addText(parent, tag, value) {
+  const element = document.createElement(tag);
+  element.textContent = value ?? '';
+  parent.appendChild(element);
+  return element;
+}
+
+// Retrieve resident requests from the backend.
+async function loadRequests() {
+  try {
+    const response = await fetch('/api/requests');
+
+    if (!response.ok) {
+      throw new Error('Could not retrieve assistance requests');
+    }
+
+    const requests = await response.json();
+
+    requestList.replaceChildren();
+
+    if (requests.length === 0) {
+      addText(requestList, 'p', 'No assistance requests yet.');
+      return;
+    }
+
+    for (const request of requests) {
+      const card = document.createElement('article');
+      card.className = 'cov';
+
+      addText(card, 'h3', `Request #${request.id}`);
+      addText(card, 'p', `Location: ${request.location}`);
+      addText(card, 'p', `Injuries: ${request.injuries}`);
+      addText(card, 'p', `Urgent needs: ${request.urgent_needs}`);
+      addText(card, 'p',
+        `Communication: ${request.communication_methods}`);
+      addText(card, 'p',
+        `Contact details: ${request.contact_details || 'Not provided'}`);
+      addText(card, 'p',
+        `Additional details: ${request.additional_details || 'None'}`);
+      addText(card, 'p', `Status: ${request.status}`);
+
+      // Team assignment dropdown
+      const teamLabel = addText(card, 'label', 'Assign team');
+
+      const teamSelect = document.createElement('select');
+
+      const teamOptions = ['', 'Alpha', 'Bravo', 'Charlie', 'Delta'];
+
+      for (const team of teamOptions) {
+        const option = document.createElement('option');
+        option.value = team;
+        option.textContent = team || 'Unassigned';
+        option.selected = (request.team || '') === team;
+        teamSelect.appendChild(option);
+      }
+
+      teamSelect.addEventListener('change', async () => {
+        await updateRequest(request.id, {
+          team: teamSelect.value || null
+        });
+      });
+
+      teamLabel.appendChild(teamSelect);
+
+      // Case status dropdown
+      const statusLabel = addText(card, 'label', 'Update status');
+
+      const statusSelect = document.createElement('select');
+
+      for (const status of ['New', 'Assigned', 'En route', 'Resolved']) {
+        const option = document.createElement('option');
+        option.value = status;
+        option.textContent = status;
+        option.selected = request.status === status;
+        statusSelect.appendChild(option);
+      }
+
+      statusSelect.addEventListener('change', async () => {
+        await updateRequest(request.id, {
+          status: statusSelect.value
+        });
+      });
+
+      statusLabel.appendChild(statusSelect);
+
+      requestList.appendChild(card);
+    }
+
+  } catch (error) {
+    requestList.replaceChildren();
+    addText(requestList, 'p', error.message);
+  }
+}
+
+// Save responder changes to SQLite.
+async function updateRequest(id, changes) {
+  try {
+    const response = await fetch(`/api/requests/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(changes)
+    });
+
+    if (!response.ok) {
+      throw new Error('Could not update assistance request');
+    }
+
+    await loadRequests();
+
+  } catch (error) {
+    alert(error.message);
+    await loadRequests();
+  }
+}
+
+// Load requests when the dashboard opens.
+loadRequests();
+
+// Check for new requests every five seconds.
+setInterval(() => {
+  if (document.activeElement?.tagName !== 'SELECT') {
+    loadRequests();
+  }
+}, 5000);
 </script>
 </body>
 </html>
